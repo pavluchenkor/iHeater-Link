@@ -15,25 +15,25 @@ iHeater Link publishes the device to Home Assistant via MQTT Discovery: HA autom
 
 In the Home Assistant sidebar, click **Settings** at the bottom.
 
-![Settings in the sidebar](../../../img/HA-integration-01.png)
+![Settings in the sidebar](../../img/HA-integration-01.png)
 
 ## Step 2. Go to Devices & services
 
 From the settings list pick **Devices & services**.
 
-![Devices & services](../../../img/HA-integration-02.png)
+![Devices & services](../../img/HA-integration-02.png)
 
 ## Step 3. Open the MQTT integration
 
 Find the **MQTT** card in the integrations list. Below the name is the connected-device count.
 
-![MQTT in the integrations list](../../../img/HA-integration-03.png)
+![MQTT in the integrations list](../../img/HA-integration-03.png)
 
 ## Step 4. Locate the iDryer device
 
 On the integration page expand the broker entry under **Services** (`127.0.0.1` or your broker's address). All iDryer devices are listed below it by serial number (`DEVICE_*`).
 
-![MQTT devices](../../../img/HA-integration-04.png)
+![MQTT devices](../../img/HA-integration-04.png)
 
 Click the device you need.
 
@@ -49,7 +49,7 @@ The device page has two blocks:
   - iHeater Link: `heater_power`, `mode`, `alerts`
   - Storage Link: same plus `temperature`, `humidity`
 
-![Device page in HA](../../../img/HA-integration-05.png)
+![Device page in HA](../../img/HA-integration-05.png)
 
 To start heating:
 

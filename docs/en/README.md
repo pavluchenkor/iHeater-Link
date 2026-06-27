@@ -46,7 +46,7 @@ iHeater controller over the 5 V line. This is the simplest setup. If
 needed, iHeater power can be sourced separately — Link does not depend
 on the power scheme.
 
-![ESP32-C3 Super Mini to iHeater wiring](../../img/iHeaterLink.png)
+![ESP32-C3 Super Mini to iHeater wiring](../img/iHeaterLink.png)
 
 Connections (same for all supported boards):
 
@@ -60,11 +60,11 @@ Connections (same for all supported boards):
 
 ESP32-C3 Super Mini:
 
-![ESP32-C3 Super Mini pinout](../../img/ESP32-C3-Super-Mini-pinout-low.jpg)
+![ESP32-C3 Super Mini pinout](../img/ESP32-C3-Super-Mini-pinout-low.jpg)
 
 Waveshare ESP32-S3-Zero:
 
-![Waveshare ESP32-S3-Zero pinout](../../img/ESP32-C3-ZERO-Waveshare-pinout-low.jpg)
+![Waveshare ESP32-S3-Zero pinout](../img/ESP32-C3-ZERO-Waveshare-pinout-low.jpg)
 
 ## Flashing via the web flasher
 

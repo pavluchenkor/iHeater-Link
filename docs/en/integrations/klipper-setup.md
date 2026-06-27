@@ -102,19 +102,19 @@ If there is no sensor or you are not sure, skip this step. The `target` passed b
 
 In the portal, open the iHeater Link device and click **MOONRAKER** in the **Device Info** block. In the interface, this name is used for Klipper printers.
 
-![Selecting Moonraker in Device Info](../../../img/iheater-link-settings-01.png)
+![Selecting Moonraker in Device Info](../../img/iheater-link-settings-01.png)
 
 Then click the gear icon in the device card, open device settings, and enable the **MOONRAKER** connection.
 
-![Device settings](../../../img/iheater-link-settings-03.png)
+![Device settings](../../img/iheater-link-settings-03.png)
 
-![Enabling Moonraker in device settings](../../../img/iheater-link-settings-04.png)
+![Enabling Moonraker in device settings](../../img/iheater-link-settings-04.png)
 
 Return to the **MOONRAKER** settings, enter the printer IP address, and save the settings.
 
-![Returning to Moonraker settings](../../../img/iheater-link-settings-05.png)
+![Returning to Moonraker settings](../../img/iheater-link-settings-05.png)
 
-![Moonraker settings](../../../img/iheater-link-settings-02.png)
+![Moonraker settings](../../img/iheater-link-settings-02.png)
 
 Usually these values are enough:
 
@@ -130,7 +130,7 @@ After saving, iHeater Link starts reading `VIRTUAL_CHAMBER.target` from Klipper 
 
 Heating can also be started without a slicer: set the chamber temperature in the device card and click **START**. The time field sets the heating duration in minutes. If the time is left at `0`, iHeater will run without a time limit until you click **STOP** or send an off command.
 
-![Manual iHeater start](../../../img/iheater-link-settings-03.png)
+![Manual iHeater start](../../img/iheater-link-settings-03.png)
 
 ## 5. Test the macros
 

@@ -20,25 +20,25 @@ When the print ends or the active scenario no longer requires heating, Link turn
 
 In the portal, open the iHeater Link device card and click the gear icon.
 
-![Opening device settings](../../../img/iheater-link-settings-bambu-02.png)
+![Opening device settings](../../img/iheater-link-settings-bambu-02.png)
 
 ## 2. Enable the Bambu connection
 
 In device settings, open **CONNECTIONS** and enable **BAMBU**. Other connections can stay disabled if you do not use them.
 
-![Enabling Bambu in device settings](../../../img/iheater-link-settings-bambu-03.png)
+![Enabling Bambu in device settings](../../img/iheater-link-settings-bambu-03.png)
 
 ## 3. Select Bambu Lab on the device page
 
 Return to the device page and click **BAMBU LAB** in the **Device Info** block. The button becomes active.
 
-![Selecting Bambu Lab](../../../img/iheater-link-settings-bambu-04.png)
+![Selecting Bambu Lab](../../img/iheater-link-settings-bambu-04.png)
 
 ## 4. Enter connection parameters
 
 In **Bambu Lab** settings, enable the integration and fill in the connection parameters.
 
-![Bambu Lab settings](../../../img/iheater-link-settings-bambu-05.png)
+![Bambu Lab settings](../../img/iheater-link-settings-bambu-05.png)
 
 Usually these fields are required:
 
@@ -54,7 +54,7 @@ The printer and iHeater Link must be on the same local network. LAN access code 
 
 Open **MATERIALS** in device settings. Each filament type can have its own chamber temperature.
 
-![Material temperatures](../../../img/iheater-link-settings-001-materials.png)
+![Material temperatures](../../img/iheater-link-settings-001-materials.png)
 
 The firmware already includes a broad set of filament types. When the printer starts preparation or printing, Link checks the active tray, detects the filament type, and uses the temperature from this table. For example, PLA can use a low temperature or no heating, while ABS and ASA can use higher chamber temperatures.
 

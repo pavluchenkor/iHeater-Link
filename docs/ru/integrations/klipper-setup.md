@@ -104,19 +104,19 @@ gcode:
 
 В портале откройте устройство iHeater Link и нажмите **MOONRAKER** в блоке **Device Info**. В интерфейсе это название используется для Klipper-принтеров.
 
-![Выбор Moonraker в Device Info](../../../img/iheater-link-settings-01.png)
+![Выбор Moonraker в Device Info](../../img/iheater-link-settings-01.png)
 
 Затем нажмите иконку шестерёнки в карточке устройства, откройте настройки соединений и включите **MOONRAKER**.
 
-![Настройки устройства](../../../img/iheater-link-settings-03.png)
+![Настройки устройства](../../img/iheater-link-settings-03.png)
 
-![Включение Moonraker в настройках устройства](../../../img/iheater-link-settings-04.png)
+![Включение Moonraker в настройках устройства](../../img/iheater-link-settings-04.png)
 
 Вернитесь к настройкам **MOONRAKER**, укажите IP-адрес принтера и сохраните настройки.
 
-![Возврат к настройкам Moonraker](../../../img/iheater-link-settings-05.png)
+![Возврат к настройкам Moonraker](../../img/iheater-link-settings-05.png)
 
-![Настройки Moonraker](../../../img/iheater-link-settings-02.png)
+![Настройки Moonraker](../../img/iheater-link-settings-02.png)
 
 Обычно достаточно таких параметров:
 
@@ -132,7 +132,7 @@ gcode:
 
 Нагрев можно включать и без слайсера: задайте температуру камеры в карточке устройства и нажмите **START**. В поле времени можно указать длительность нагрева в минутах. Если оставить время `0`, iHeater будет работать без ограничения по времени, пока вы не нажмёте **STOP** или не отправите команду выключения.
 
-![Ручной запуск iHeater](../../../img/iheater-link-settings-03.png)
+![Ручной запуск iHeater](../../img/iheater-link-settings-03.png)
 
 ## 5. Проверьте работу макросов
 

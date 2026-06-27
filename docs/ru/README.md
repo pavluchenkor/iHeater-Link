@@ -37,7 +37,7 @@ iHeater Link — модуль связи для контроллера **iHeater
 
 Питание подаётся на ESP через USB-C. ESP, в свою очередь, питает контроллер iHeater по линии 5 V. Это самый простой вариант. При необходимости питание iHeater можно организовать иначе — связь с Link не зависит от схемы питания.
 
-![Подключение ESP32-C3 Super Mini к iHeater](../../img/iHeaterLink.png)
+![Подключение ESP32-C3 Super Mini к iHeater](../img/iHeaterLink.png)
 
 Соединения (для всех поддерживаемых плат):
 
@@ -51,11 +51,11 @@ iHeater Link — модуль связи для контроллера **iHeater
 
 ESP32-C3 Super Mini:
 
-![Пинаут ESP32-C3 Super Mini](../../img/ESP32-C3-Super-Mini-pinout-low.jpg)
+![Пинаут ESP32-C3 Super Mini](../img/ESP32-C3-Super-Mini-pinout-low.jpg)
 
 Waveshare ESP32-S3-Zero:
 
-![Пинаут Waveshare ESP32-S3-Zero](../../img/ESP32-C3-ZERO-Waveshare-pinout-low.jpg)
+![Пинаут Waveshare ESP32-S3-Zero](../img/ESP32-C3-ZERO-Waveshare-pinout-low.jpg)
 
 ## Прошивка через веб-флешер
 

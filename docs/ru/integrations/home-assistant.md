@@ -15,25 +15,25 @@ iHeater Link публикует устройство в Home Assistant чере�
 
 В боковом меню Home Assistant внизу нажмите **Settings**.
 
-![Settings в боковом меню](../../../img/HA-integration-01.png)
+![Settings в боковом меню](../../img/HA-integration-01.png)
 
 ## Шаг 2. Перейти в Devices & services
 
 В списке разделов настроек выберите **Devices & services**.
 
-![Devices & services](../../../img/HA-integration-02.png)
+![Devices & services](../../img/HA-integration-02.png)
 
 ## Шаг 3. Открыть интеграцию MQTT
 
 В списке интеграций найдите карточку **MQTT**. Под названием — счётчик подключённых устройств.
 
-![MQTT в списке интеграций](../../../img/HA-integration-03.png)
+![MQTT в списке интеграций](../../img/HA-integration-03.png)
 
 ## Шаг 4. Найти устройство iDryer
 
 На странице интеграции в разделе **Services** разверните узел брокера (`127.0.0.1` или адрес вашего брокера). Под ним перечислены iDryer-устройства с их серийными номерами вида `DEVICE_*`.
 
-![Устройства MQTT](../../../img/HA-integration-04.png)
+![Устройства MQTT](../../img/HA-integration-04.png)
 
 Кликните по нужному устройству.
 
@@ -49,7 +49,7 @@ iHeater Link публикует устройство в Home Assistant чере�
   - iHeater Link: `heater_power`, `mode`, `alerts`
   - Storage Link: то же плюс `temperature`, `humidity`
 
-![Страница устройства в HA](../../../img/HA-integration-05.png)
+![Страница устройства в HA](../../img/HA-integration-05.png)
 
 Чтобы запустить нагрев:
 

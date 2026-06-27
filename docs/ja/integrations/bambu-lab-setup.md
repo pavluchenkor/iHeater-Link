@@ -1,9 +1,73 @@
-<!-- i18n-placeholder: true -->
+# Bambu LabのiHeater Link設定
 
-# Translation wanted
+## 用途
 
-This page is not available in this language yet.
+iHeater LinkはBambu Labプリンタでの印刷中にiHeaterを自動的に制御できます。Klipperシナリオとは異なり、Bambuプリンタにマクロを追加したりG-codeを変更する必要はありません。Linkはローカルネットワークでプリンタに接続し、印刷状態とアクティブなフィラメントを読み取ります。
 
-You can help the iDryer project by translating this article. Please use the English or Russian version as the source, check the meaning carefully, and submit your translation as a pull request to the documentation repository.
+現在のBambu Labプリンタでは、チャンバー温度の伝送をiHeater制御コマンドとして確実に使用することはできません。しかし、Linkはアクティブなトレイに現在インストールされているフィラメントの種類を判定し、プリンタが印刷準備を開始したか、またはすでに印刷中かどうかを検出できます。フィラメントタイプに基づいて、ファームウェアは材料テーブルから必要なチャンバー温度を選択し、iHeaterを自動的に有効にします。
 
-Thank you for helping make the documentation available to more makers.
+必要なフィラメントタイプが対応フィラメント一覧にない場合は、ファームウェアの著者に連絡してください。タイプは将来のバージョンで追加できます。
+
+## 結果
+
+```text
+Bambuが準備または印刷を開始 -> Linkがアクティブなフィラメントを検出 -> 材料テーブルから温度を選択 -> iHeaterが有効になる
+```
+
+印刷が終了するか、アクティブなシーケンスが加熱を必要としなくなると、LinkはiHeaterを無効にします。
+
+## 1. デバイス設定を開く
+
+ポータルでiHeater Linkカードを開き、ギアアイコンをクリックします。
+
+![デバイス設定を開く](../../img/iheater-link-settings-bambu-02.png)
+
+## 2. Bambu接続を有効にする
+
+デバイス設定で**CONNECTIONS**ブロックを開き、**BAMBU**を有効にします。使用されていない場合は、他の接続を無効のままにすることができます。
+
+![デバイス設定でBambuを有効にする](../../img/iheater-link-settings-bambu-03.png)
+
+## 3. デバイスページでBambu Labを選択する
+
+デバイスページに戻り、**Device Info**ブロックの**BAMBU LAB**をクリックします。ボタンがアクティブになります。
+
+![Bambu Labを選択](../../img/iheater-link-settings-bambu-04.png)
+
+## 4. 接続パラメータを入力する
+
+**Bambu Lab**設定で統合を有効にし、接続パラメータを入力します。
+
+![Bambu Lab設定](../../img/iheater-link-settings-bambu-05.png)
+
+通常は以下のフィールドが必要です:
+
+- Printer IP: ローカルネットワークのプリンタのIPアドレス
+- Printer serial: プリンタのシリアル番号
+- LAN access code: LANモードアクセスコード
+- Auto-apply on tag detect: Linkが検出されたフィラメントに基づいて温度を自動的に適用すべき場合は有効にします
+- Default AMS および Default tray: 特定のAMSまたはトレイを強制的に選択する必要がない場合は、デフォルト値のままにすることができます。
+
+プリンタとiHeater Linkは同じローカルネットワーク上にある必要があります。LANアクセスコードとシリアル番号はBambu Labプリンタの設定から取得されます。
+
+## 5. 材料温度を設定する
+
+デバイス設定の**MATERIALS**ブロックを開きます。フィラメントタイプごとに独自のチャンバー温度を設定できます。
+
+![材料温度](../../img/iheater-link-settings-001-materials.png)
+
+ファームウェアには既に広範なフィラメントタイプが含まれています。プリンタが印刷準備を開始するか印刷が開始されると、Linkはアクティブなトレイを確認し、フィラメントタイプを判定し、このテーブルから温度を取得します。例えば、PLAの場合は低温を設定するか加熱を無効にすることができ、ABSおよびASAの場合はより高い温度を設定できます。
+
+アクティブなフィラメントがテーブルに見つからない場合、または指定された温度が不適切な場合は、**MATERIALS**の値を編集して設定を保存します。
+
+## 6. 動作を確認する
+
+**MATERIALS**で温度が設定されているフィラメントを使用してBambu Labで印刷を開始します。プリンタが準備または印刷に移行すると、iHeater Linkはアクティブなフィラメントに温度を適用し、iHeaterを有効にする必要があります。
+
+加熱が有効にならない場合は、以下を確認してください:
+
+- デバイス設定で**BAMBU**接続が有効になっているか
+- **Device Info**ブロックで**BAMBU LAB**が選択されているか
+- IP、serial、およびLANアクセスコードが正しく入力されているか
+- プリンタがアクティブなトレイとフィラメントタイプを認識しているか
+- **MATERIALS**でこのフィラメントタイプに温度が設定されているか
