@@ -7,7 +7,7 @@
 
 #define MENU_META_COUNT 47
 #define MENU_LANG_COUNT 2
-#define MENU_SERIALIZED_MAX_SIZE 6304
+#define MENU_SERIALIZED_MAX_SIZE 6332
 
 typedef enum {
     META_SUBMENU = 0,
@@ -231,7 +231,7 @@ static const MenuMeta g_menu_meta[MENU_META_COUNT] = {
     { 35, { "ТЕМПЕРАТУРА", "TEMPERATURE" }, { "°C", "°C" },
       META_VALUE, 34, -1, 0,
       META_VT_F32, 45.0f, 65.0f, 1.0f, META_SCOPE_GLOBAL,
-      nullptr, nullptr },
+      "iheater.heat_temp", nullptr },
     // [36] heat_duration
     { 36, { "ВРЕМЯ", "TIME" }, { "мин", "min" },
       META_VALUE, 34, -1, 0,

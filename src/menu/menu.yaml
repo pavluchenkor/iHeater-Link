@@ -412,6 +412,7 @@
           max: 65
           step: 1
           bind: heat_temp
+          role: iheater.heat_temp
           persist: true
           scope: global
           default: 60.0
