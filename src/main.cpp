@@ -217,6 +217,10 @@ void setup() {
   menu_nvs_begin(); // NVS namespace до device.begin (известный init contract)
   device().begin();
 
+  // Не шлём device-timestamp в publish: портал хранит своё серверное время
+  // приёма, device-timestamp избыточен (экономия трафика). См. MqttClient.
+  device().mqttClient()->setAddTimestamp(false);
+
   // Phase 6 OTA: регистрируем приёмник прошивки СРАЗУ после link.begin().
   // Подписка на firmware_update_* через onCommand + setOtaChunkCallback.
   // markCurrentBootValid отменяет bootloader rollback — если эта прошивка
