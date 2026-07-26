@@ -53,8 +53,10 @@ static const iDryer::Config CFG = {
     .allowMoonraker = true, // Moonraker WebSocket
 
     // ── Периоды публикации ───────────────────────────────────────────────────
-    .telemetryPeriodMs = 5000,
-    .statusPeriodMs = 5000,
+    .telemetryPeriodMs = 30000,
+    .telemetryPeriodIdleMs = 60000,
+    .statusPeriodMs = 60000,  // сверка; изменения и события греющих команд уходят сразу
+    .statusPeriodIdleMs = 300000,
 
     // ── Идентификация (отображается на портале) ──────────────────────────────
     .hardwareVersion = "LINK-v1",
