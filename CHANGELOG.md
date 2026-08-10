@@ -32,3 +32,4 @@
 ### Исправлено
 
 - Маппинг `ERRSEV_CRITICAL` → `EventKind::Critical`.
+- `MenuBridge` публикует config через `DevicePublisher` (dual-publish MQTT+WS) вместо `MqttClient`. Ответ на `get_config` теперь доходит и до LAN-клиента — меню и настройки iHeater видны по локальной сети (раньше config уходил только в MQTT). То же исправляет отражение правок значений по LAN.
