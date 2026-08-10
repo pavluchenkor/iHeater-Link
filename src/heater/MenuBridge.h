@@ -18,8 +18,10 @@
 
 #include <menu_publisher.h>  // idryer::MenuPublisher для pre-allocated публикации меню
 
-// Forward declaration — чтобы не тянуть весь mqtt_client.h в публичный заголовок.
-namespace idryer { class MqttClient; }
+// Forward declaration — чтобы не тянуть весь device_publisher.h в публичный
+// заголовок. DevicePublisher шлёт config в MQTT И в локальный WS (dual-publish),
+// чтобы LAN-клиент тоже получал меню в ответ на get_config.
+namespace idryer { class DevicePublisher; }
 
 namespace iheaterlink {
 
@@ -38,7 +40,7 @@ using IgnoreExternalCmdCallback = std::function<void(bool)>;
 
 class MenuBridge {
 public:
-    explicit MenuBridge(idryer::MqttClient* mqtt) : mqtt_(mqtt) {}
+    explicit MenuBridge(idryer::DevicePublisher* pub) : pub_(pub) {}
 
     /// Зарегистрировать колбэк на смену активного ПОДКЛЮЧЕНИЯ.
     /// Будет вызван один раз из begin() со стартовым значением и далее
@@ -85,7 +87,7 @@ private:
     /// Вызвать ignoreExtCmdCb_ если значение изменилось с прошлого вызова.
     void emitIgnoreExtCmdIfChanged();
 
-    idryer::MqttClient* mqtt_ = nullptr;
+    idryer::DevicePublisher* pub_ = nullptr;
     bool nvsReady_ = false;
     ActiveConnectionCallback activeCb_;
     ActiveConnection lastActive_ = ActiveConnection::None;

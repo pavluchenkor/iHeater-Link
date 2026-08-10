@@ -236,7 +236,9 @@ void setup() {
 
   // 3. MenuBridge: загружает NVS, эмитит активную интеграцию. Колбэк
   // назначается ДО begin().
-  static iheaterlink::MenuBridge s_menuBridgeInst(device().mqttClient());
+  // DevicePublisher (dual-publish MQTT+WS) — чтобы config в ответ на get_config
+  // доходил и до LAN-клиента, а не только в MQTT.
+  static iheaterlink::MenuBridge s_menuBridgeInst(device().devicePublisher());
   s_menuBridge = &s_menuBridgeInst;
 
   auto *mgr = device().integrationsManager();

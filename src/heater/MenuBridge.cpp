@@ -5,7 +5,7 @@
 #include <string.h>
 
 #include <hal/hal_types.h>
-#include <mqtt/mqtt_client.h>
+#include <local_access/device_publisher.h>
 
 // Сгенерированные артефакты меню (v3_nvs).
 #include <menu_bindings.h>
@@ -162,15 +162,16 @@ void MenuBridge::emitIgnoreExtCmdIfChanged() {
 }
 
 bool MenuBridge::publishFullConfig() {
-  if (!mqtt_)
+  if (!pub_)
     return false;
   if (!nvsReady_)
     begin();
 
   // MenuPublisher переиспользует pre-allocated heap-буфер и DynamicJsonDocument
   // (выделены один раз в begin()). Никаких malloc/free в горячем пути, нет
-  // static char[] в .bss.
-  size_t len = menuPub_.publishFull(mqtt_);
+  // static char[] в .bss. DevicePublisher::publishConfigRaw делает dual-publish:
+  // config уходит и в MQTT, и в локальный WS — LAN-клиент получает меню.
+  size_t len = menuPub_.publishFull(pub_);
   if (len == 0) {
     HAL_LOG_ERROR("MENU", "menuPub_.publishFull returned 0 (overflow/init?)");
     return false;
