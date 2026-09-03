@@ -372,6 +372,9 @@ void setup() {
   link.onCommand(
       "find", [](JsonObjectConst) { /* iHeater Link не имеет индикатора */ });
   link.onCommand("clear_errors", [](JsonObjectConst) { /* нет UART-ошибок */ });
+  // binding-v3: портал отвязал устройство (retained REVOKE) → стереть секрет,
+  // вернуться к ожиданию токена привязки (SETUP).
+  link.onCommand("revoke", [](JsonObjectConst) { device().handleRevoke(); });
 
   // get_config / set / invoke — команды управления меню (menu_protocol_v1).
   link.onCommand("get_config", [](JsonObjectConst) {
