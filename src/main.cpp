@@ -212,10 +212,6 @@ void setup() {
   // SDK + Improv РАНО — handleSerial должен быть готов перехватить байты от
   // portal ДО того как остальной setup съест CPU. Тонкий setup = стабильный
   // Improv.
-  device().onClaimPin([](const char *pin, uint32_t expires) {
-    Serial.printf("CLAIM_PIN:%s:%lu\n", pin, expires);
-    Serial.flush();
-  });
   menu_nvs_begin(); // NVS namespace до device.begin (известный init contract)
   device().begin();
 
