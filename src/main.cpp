@@ -57,6 +57,9 @@ static const iDryer::Config CFG = {
     .telemetryPeriodIdleMs = 60000,
     .statusPeriodMs = 60000,  // сверка; изменения и события греющих команд уходят сразу
     .statusPeriodIdleMs = 300000,
+    // Греет реальную камеру: цикл нельзя бросать на середине, но он
+    // закончится сам — обновление ждёт простоя.
+    .otaInterrupt = iDryer::OTA_INTERRUPT_IHEATER_LINK,
 
     // ── Идентификация (отображается на портале) ──────────────────────────────
     .hardwareVersion = "LINK-v1",
