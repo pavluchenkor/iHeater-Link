@@ -53,10 +53,9 @@ static const iDryer::Config CFG = {
     .allowMoonraker = true, // Moonraker WebSocket
 
     // ── Периоды публикации ───────────────────────────────────────────────────
-    .telemetryPeriodMs = 30000,
-    .telemetryPeriodIdleMs = 60000,
-    .statusPeriodMs = 60000,  // сверка; изменения и события греющих команд уходят сразу
-    .statusPeriodIdleMs = 300000,
+    // Не задаём: ядро берёт их из контракта (publish_defaults в
+    // mqtt_contract.yaml). Прежние значения здесь совпадали с контрактными.
+    // Изменения и события греющих команд уходят сразу, период — только сверка.
     // Греет реальную камеру: цикл нельзя бросать на середине, но он
     // закончится сам — обновление ждёт простоя.
     .otaInterrupt = iDryer::OTA_INTERRUPT_IHEATER_LINK,
