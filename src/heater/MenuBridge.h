@@ -61,9 +61,14 @@ public:
     /// Возвращает true если публикация успешна.
     bool publishFullConfig();
 
+    /// Опубликовать патч изменённых значений в `config/delta`
+    /// ({"rev":N,"d":{"<id>":val}}). Полное меню остаётся за publishFullConfig()
+    /// — оно уходит на подключении и по get_config.
+    bool publishDelta(const uint16_t* ids, uint8_t count);
+
     /// Применить одиночное изменение значения.
     /// Ожидаемый JSON: {"id":<int>, "val":<num|bool>} или {"bind":"<name>", "val":<num|bool>}.
-    /// Обновляет MenuState, g_menu_cache и NVS; публикует обновлённый config.
+    /// Обновляет MenuState, g_menu_cache и NVS; публикует дельту изменённых пунктов.
     /// @return true если правка применена.
     bool applySetCommand(JsonObjectConst data);
 
@@ -98,6 +103,8 @@ private:
     /// переиспользуется на каждый publishFullConfig. Заменяет старую логику
     /// со static char buf[MENU_FULL_JSON_BUF_SIZE] в .bss.
     idryer::MenuPublisher menuPub_;
+    /// Счётчик ревизий для config/delta: портал требует поле `rev` числом.
+    uint16_t deltaRev_ = 0;
 };
 
 } // namespace iheaterlink

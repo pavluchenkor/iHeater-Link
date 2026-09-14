@@ -176,7 +176,10 @@ static void enrichTelemetry(JsonObject root) {
   root["outputMode"] = heating ? 1 : 0;
   root["targetTempC"] = cmd.targetTempC;
 
-  // chamberTemp от активной интеграции — публикуем только при реальных данных.
+  // Температура камеры от активной интеграции — в стандартное поле
+  // units[0].temperature: именно по нему портал пишет телеметрию в БД и строит
+  // график (top-level поля он для этого не читает). Своего датчика у Link нет,
+  // камера принтера — его единственная измеряемая температура.
   // У Bambu/Moonraker клиентов поле инициализировано NAN и обновляется лишь
   // когда принтер прислал значение (или has_sensor=1 у Klipper). Если NAN —
   // поле в JSON не пишем (telemetry_null_policy: отсутствие = нет данных).
@@ -188,7 +191,15 @@ static void enrichTelemetry(JsonObject root) {
     } else if (activeAI == AI::Moonraker) {
       chamberT = mgr->moonrakerStatus().chamberTemperature;
     }
-    if (!isnan(chamberT)) root["chamberTemp"] = chamberT;
+    if (!isnan(chamberT)) {
+      JsonArray units = root["units"];
+      if (!units.isNull() && units.size() > 0) {
+        JsonObject u1 = units[0];
+        // Собственный датчик, если появится, заполнит поле раньше нас
+        // (cfg.hasAirTemp) — тогда не затираем.
+        if (!u1.containsKey("temperature")) u1["temperature"] = chamberT;
+      }
+    }
   }
 }
 
@@ -317,6 +328,19 @@ void setup() {
     const uint8_t diff = (cur > last) ? (cur - last) : (last - cur);
     if (last == 0xFF || diff >= 1)
       device().publishStatusNow();
+  });
+  //    Полное меню при выходе в онлайн. Портал держит меню актуальным по
+  //    config (снимок) + config/delta (изменения), но снимок с брокера иначе
+  //    не обновляется: обычные правки уходят дельтой, а retained config
+  //    остаётся от прошлой сессии и после рестарта портала перетирает
+  //    накопленные патчи. Публикуем через флаг — сама отправка идёт из loop(),
+  //    где стек свободен (из колбэка команды она переполняла loopTask).
+  device().every(2000, []() {
+    static bool s_wasOnline = false;
+    const bool online = device().isOnline();
+    if (online && !s_wasOnline)
+      s_menuPublishPending = true;
+    s_wasOnline = online;
   });
   //    Авто-Off по deadline drying — раз в полсекунды проверяем дедлайн.
   device().every(500, []() {

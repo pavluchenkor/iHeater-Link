@@ -10,15 +10,6 @@
   type: submenu
   title: { ru: "IHEATER LINK", en: "IHEATER LINK" }
   children:
-    - id: portal
-      type: submenu
-      title: { ru: "ПОРТАЛ", en: "PORTAL" }
-      children:
-        - id: start_claim
-          type: action
-          title: { ru: "СВЯЗАТЬ", en: "CLAIM" }
-          on_invoke: start_claim
-
     - id: connections
       type: submenu
       title: { ru: "ПОДКЛЮЧЕНИЯ", en: "CONNECTIONS" }

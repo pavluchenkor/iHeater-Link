@@ -29,7 +29,10 @@ constexpr size_t kConnectionTogglesCount =
 
 /// Выключить все toggle ПОДКЛЮЧЕНИЙ кроме `keepBind`.
 /// Возвращает количество отключённых.
-int disableOtherConnections(const char *keepBind) {
+/// @param outIds  куда сложить id выключенных пунктов (может быть nullptr).
+/// @param outCap   ёмкость outIds.
+int disableOtherConnections(const char *keepBind, uint16_t *outIds = nullptr,
+                            size_t outCap = 0) {
   int off = 0;
   for (size_t i = 0; i < kConnectionTogglesCount; i++) {
     const char *b = kConnectionToggles[i];
@@ -38,6 +41,9 @@ int disableOtherConnections(const char *keepBind) {
     bool cur = false;
     if (menu_read_by_bind(b, &cur) && cur) {
       menu_apply_by_bind(b, 0.0f);
+      const MenuBinding *mb = menu_find_bind(b);
+      if (mb && outIds && (size_t)off < outCap)
+        outIds[off] = mb->id;
       off++;
       HAL_LOG_INFO("MENU", "exclusivity: %s → OFF", b);
     }
@@ -180,6 +186,73 @@ bool MenuBridge::publishFullConfig() {
   return true;
 }
 
+bool MenuBridge::publishDelta(const uint16_t *ids, uint8_t count) {
+  if (!pub_ || !ids || count == 0)
+    return false;
+
+  // Патч уходит вместо полного меню: портал держит меню в актуальном виде по
+  // config (на подключении) + config/delta (на изменение). Полная публикация
+  // из обработчика команды переполняла стек loopTask — она собирает меню
+  // целиком (буферы на 512 + 512 + 1120 байт) поверх и без того глубокого
+  // стека приёма MQTT.
+  StaticJsonDocument<256> doc;
+  doc["rev"] = ++deltaRev_;
+  JsonObject d = doc.createNestedObject("d");
+
+  uint8_t units = g_menu_cache.getUnitsCount();
+  if (units == 0)
+    units = 1;
+
+  char key[8];
+  for (uint8_t i = 0; i < count; i++) {
+    const uint16_t id = ids[i];
+    if (id >= MENU_META_COUNT)
+      continue;
+    const MenuMeta *meta = &g_menu_meta[id];
+    snprintf(key, sizeof(key), "%u", (unsigned)id);
+
+    // Форма значения — та же, что в полном меню: global отдаём скаляром,
+    // per-unit массивом по юнитам. Иначе патч разъедется с тем, что портал
+    // положил в кэш из config.
+    if (meta->scope == META_SCOPE_GLOBAL) {
+      if (meta->type == META_TOGGLE)
+        d[key] = g_menu_cache.getBool(id, 0);
+      else
+        d[key] = g_menu_cache.getFloat(id, 0);
+    } else {
+      JsonArray vals = d.createNestedArray(key);
+      for (uint8_t u = 0; u < units; u++) {
+        if (meta->type == META_TOGGLE)
+          vals.add(g_menu_cache.getBool(id, u));
+        else
+          vals.add(g_menu_cache.getFloat(id, u));
+      }
+    }
+  }
+
+  if (doc.overflowed()) {
+    HAL_LOG_ERROR("MENU", "delta does not fit 256 bytes (%u items)",
+                  (unsigned)count);
+    return false;
+  }
+
+  char buf[192];
+  const size_t len = serializeJson(doc, buf, sizeof(buf));
+  if (len == 0) {
+    HAL_LOG_ERROR("MENU", "delta serialize failed");
+    return false;
+  }
+
+  // publishConfigDelta — dual-publish: MQTT config/delta + локальный WS.
+  if (!pub_->publishConfigDelta(buf, len)) {
+    HAL_LOG_WARN("MENU", "delta publish failed (rev %u)", (unsigned)deltaRev_);
+    return false;
+  }
+  HAL_LOG_INFO("MENU", "delta published: %u bytes, rev %u", (unsigned)len,
+               (unsigned)deltaRev_);
+  return true;
+}
+
 bool MenuBridge::applySetCommand(JsonObjectConst data) {
   if (!nvsReady_)
     begin();
@@ -225,12 +298,20 @@ bool MenuBridge::applySetCommand(JsonObjectConst data) {
     return false;
   }
 
+  // Изменённые пункты для дельты: сам пункт + те, что погасила эксклюзивность.
+  uint16_t changed[1 + kConnectionTogglesCount];
+  uint8_t changedCount = 0;
+  changed[changedCount++] = b->id;
+
   // Эксклюзивность ПОДКЛЮЧЕНИЙ: если включили bambu_en/moon_en/ha_en —
   // остальные два выключаем.
   if (val > 0.0f) {
     for (size_t i = 0; i < kConnectionTogglesCount; i++) {
       if (strcmp(b->bind, kConnectionToggles[i]) == 0) {
-        disableOtherConnections(b->bind);
+        const int off = disableOtherConnections(
+            b->bind, changed + changedCount,
+            sizeof(changed) / sizeof(changed[0]) - changedCount);
+        changedCount += (uint8_t)off;
         break;
       }
     }
@@ -248,7 +329,7 @@ bool MenuBridge::applySetCommand(JsonObjectConst data) {
     emitIgnoreExtCmdIfChanged();
   }
 
-  publishFullConfig();
+  publishDelta(changed, changedCount);
 
   HAL_LOG_INFO("MENU", "set: %s = %.3f (id=%u)", b->bind, (double)val,
                (unsigned)b->id);

@@ -8,8 +8,6 @@ void heat_start(void) __attribute__((weak));
 void heat_start(void) { /* stub */ }
 void heat_stop(void) __attribute__((weak));
 void heat_stop(void) { /* stub */ }
-void start_claim(void) __attribute__((weak));
-void start_claim(void) { /* stub */ }
 uint8_t menu_get_active_controller(void) __attribute__((weak));
 uint8_t menu_get_active_controller(void) { return 0; }
 #ifdef __cplusplus

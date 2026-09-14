@@ -47,12 +47,12 @@ gcode:
 
 [gcode_macro M141]
 gcode:
-  {{ "{%" }} set t = params.S|default(0)|float {{ "%}" }}
+  {% set t = params.S|default(0)|float %}
   SET_GCODE_VARIABLE MACRO=VIRTUAL_CHAMBER VARIABLE=target VALUE={t}
 
 [gcode_macro M191]
 gcode:
-  {{ "{%" }} set t = params.S|default(0)|float {{ "%}" }}
+  {% set t = params.S|default(0)|float %}
   SET_GCODE_VARIABLE MACRO=VIRTUAL_CHAMBER VARIABLE=target VALUE={t}
 
 [gcode_macro CLEAR_VIRTUAL_CHAMBER]
@@ -90,7 +90,7 @@ Se esse objeto existir, você pode transmitir a temperatura real para iHeater Li
 [delayed_gcode UPDATE_VIRTUAL_CHAMBER_TEMP]
 initial_duration: 1.0
 gcode:
-  {{ "{%" }} set t = printer["heater_generic chamber"].temperature|float {{ "%}" }}
+  {% set t = printer["temperature_sensor cavity"].temperature|float %}
   SET_GCODE_VARIABLE MACRO=VIRTUAL_CHAMBER VARIABLE=temperature VALUE={t}
   SET_GCODE_VARIABLE MACRO=VIRTUAL_CHAMBER VARIABLE=has_sensor VALUE=1
   UPDATE_DELAYED_GCODE ID=UPDATE_VIRTUAL_CHAMBER_TEMP DURATION=2.0
