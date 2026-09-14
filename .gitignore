@@ -34,3 +34,4 @@ apply-commit-messages.mjs
 img/.resize-hash
 package-lock.json
 package.json
+codex.config.json

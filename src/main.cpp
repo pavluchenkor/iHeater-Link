@@ -84,6 +84,8 @@ static uint32_t s_dryingDeadlineMs = 0;
 
 // Указатель на MenuBridge — инициализируется в setup() после begin().
 static iheaterlink::MenuBridge *s_menuBridge = nullptr;
+// Запрошен полный конфиг: публикуем из loop(), а не из колбэка приёма.
+static volatile bool s_menuPublishPending = false;
 
 // Счётчик для ротации тестовых ошибок (0..3).
 static uint8_t s_errCycle = 0;
@@ -375,10 +377,11 @@ void setup() {
   link.onCommand("revoke", [](JsonObjectConst) { device().handleRevoke(); });
 
   // get_config / set / invoke — команды управления меню (menu_protocol_v1).
-  link.onCommand("get_config", [](JsonObjectConst) {
-    if (s_menuBridge)
-      s_menuBridge->publishFullConfig();
-  });
+  // Публикуем не здесь: колбэк вызывается из разбора входящего MQTT-сообщения,
+  // то есть глубоко в стеке (сетевой стек → клиент брокера → колбэк). Сверху
+  // ложится генерация меню со своими буферами, и стек loopTask кончается —
+  // «A stack overflow in task loopTask». Ставим флаг, публикуем из loop().
+  link.onCommand("get_config", [](JsonObjectConst) { s_menuPublishPending = true; });
   link.onCommand("set", [](JsonObjectConst data) {
     if (s_logPortal) {
       char buf[256];
@@ -476,5 +479,13 @@ void setup() {
 void loop() {
   device()
       .loop(); // WiFi/MQTT/LocalAccess + auto-telemetry/status + every() tasks
+
+  // Ответ на get_config: из цикла, а не из колбэка приёма — см. onCommand.
+  if (s_menuPublishPending) {
+    s_menuPublishPending = false;
+    if (s_menuBridge)
+      s_menuBridge->publishFullConfig();
+  }
+
   error_process_all(); // шина ошибок → error_set_handler → raiseEvent
 }
