@@ -2,9 +2,16 @@
 """
 Fake Bambu publisher — шлёт report-payloads в device/{SERIAL}/report.
 
-Эмулирует реальный сценарий Bambu без датчика камеры (P1S/A1):
-chamber_target всегда 0 — целевая температура камеры берётся из типа
-филамента активного трея AMS, через menu.mat_<type> на iHeater-link.
+Две модели принтера, переключаются FAKE_BAMBU_MODEL:
+
+  p1s (по умолчанию) — без датчика камеры (P1S/A1). chamber_target всегда 0,
+      целевую температуру iHeater берёт из типа филамента активного трея
+      через menu.mat_<type>.
+  x1c — с датчиком камеры. Шлёт chamber_target/chamber_temper, температура
+      камеры приходит от принтера, тип филамента в выборе не участвует.
+
+В обоих режимах во время печати идут mc_percent, mc_remaining_time (минуты,
+как у настоящего принтера) и слои layer_num/total_layer_num.
 
 Лестница по 15 сек:
   PREPARE (PLA) → RUNNING ams (PLA) → RUNNING vt_tray (PETG)
@@ -41,6 +48,16 @@ SERIAL         = os.environ.get("FAKE_BAMBU_SERIAL", "FAKE_BAMBU_001")
 LAN_CODE       = os.environ.get("FAKE_BAMBU_LAN", "12345678")
 CERT_PATH      = os.environ.get("FAKE_BAMBU_CERT",
                                 os.path.join(os.path.dirname(__file__), "cert.pem"))
+# p1s — без датчика камеры (chamber_target = 0), x1c — с датчиком,
+# h2d — с датчиком и новой прошивкой (температуры в device.ctc, см. ниже).
+MODEL          = os.environ.get("FAKE_BAMBU_MODEL", "p1s").lower()
+HAS_CHAMBER    = MODEL in ("x1c", "x1", "x1e", "h2d")
+# Новая прошивка не шлёт chamber_temper/chamber_target, а пакует пару
+# «текущая/целевая» в одно число внутри device.ctc.info.temp.
+PACKED_TEMPS   = MODEL == "h2d"
+# Целевая температура камеры для моделей с датчиком, °C.
+CHAMBER_TARGET = float(os.environ.get("FAKE_BAMBU_CHAMBER_TARGET", "50"))
+TOTAL_LAYERS   = 120
 # Лестница: каждый источник филамента → свой тип, по 15 сек.
 #
 #   ("ams",      "PLA")    — обычный AMS slot 0 (tray_now="0")
@@ -63,6 +80,56 @@ REQUEST_TOPIC = f"device/{SERIAL}/request"
 current_index = 0
 
 
+def print_progress(source: str):
+    """Прогресс печати для текущего шага: (mc_percent, оставшиеся минуты, слой).
+
+    Настоящий принтер шлёт mc_remaining_time в минутах — iHeater переводит их
+    в секунды сам. Перед печатью и после неё прогресса нет.
+    """
+    if source == "prepare":
+        return 0, 40, 0
+    if source == "finish":
+        return 100, 0, TOTAL_LAYERS
+    # Шаги печати идут подряд, поэтому процент растёт от цикла к циклу.
+    running_step = max(0, current_index) % 12
+    percent = min(99, 10 + running_step * 8)
+    return percent, max(1, 40 - running_step * 3), int(TOTAL_LAYERS * percent / 100)
+
+
+def progress_fields(source: str):
+    percent, minutes, layer = print_progress(source)
+    return {
+        "mc_percent":        percent,
+        "mc_remaining_time": minutes,
+        "layer_num":         layer,
+        "total_layer_num":   TOTAL_LAYERS,
+    }
+
+
+def chamber_fields(source: str):
+    """Поля камеры. У модели без датчика их нет вовсе — как у настоящего P1S.
+
+    Новая прошивка (h2d) шлёт вместо chamber_* блок device.ctc.info.temp, где
+    в одном числе упакованы обе температуры: младшее слово — текущая, старшее
+    — целевая. Так же устроен и device.bed.
+    """
+    if not HAS_CHAMBER:
+        return {}
+    heating = source not in ("finish",)
+    target = CHAMBER_TARGET if heating else 0.0
+    # Текущая ползёт к цели, но не дотягивает — камера греется медленно.
+    current = 24.0 if source == "prepare" else (target - 4.0 if heating else 28.0)
+
+    if PACKED_TEMPS:
+        return {
+            "device": {
+                "ctc": {"info": {"temp": (int(target) << 16) | int(current)}, "state": 0},
+                "bed": {"info": {"temp": (60 << 16) | 58}, "state": 2},
+            }
+        }
+    return {"chamber_target": target, "chamber_temper": round(current, 1)}
+
+
 def make_payload(source: str, tray_type):
     """source: 'prepare' | 'ams' | 'vt_tray' | 'ams_ht' | 'finish'."""
     if source == "prepare":
@@ -72,7 +139,8 @@ def make_payload(source: str, tray_type):
             "print": {
                 "command":     "push_status",
                 "gcode_state": "PREPARE",
-                "mc_percent":  0,
+                **progress_fields(source),
+                **chamber_fields(source),
                 "ams": {
                     "tray_now": "0",
                     "ams": [{
@@ -94,7 +162,8 @@ def make_payload(source: str, tray_type):
             "print": {
                 "command":     "push_status",
                 "gcode_state": "RUNNING",
-                "mc_percent":  42,
+                **progress_fields(source),
+                **chamber_fields(source),
                 "ams": {
                     "tray_now": "0",
                     "ams": [{
@@ -116,7 +185,8 @@ def make_payload(source: str, tray_type):
             "print": {
                 "command":     "push_status",
                 "gcode_state": "RUNNING",
-                "mc_percent":  42,
+                **progress_fields(source),
+                **chamber_fields(source),
                 "ams": {
                     "tray_now": "254",
                     "vt_tray":  {"tray_type": tray_type, "tray_info_idx": "GFB99"},
@@ -131,7 +201,8 @@ def make_payload(source: str, tray_type):
             "print": {
                 "command":     "push_status",
                 "gcode_state": "RUNNING",
-                "mc_percent":  42,
+                **progress_fields(source),
+                **chamber_fields(source),
                 "ams": {
                     "tray_now": "128",
                     "ams": [{
@@ -149,6 +220,8 @@ def make_payload(source: str, tray_type):
         "print": {
             "command":     "push_status",
             "gcode_state": "FINISH",
+            **progress_fields(source),
+            **chamber_fields(source),
             "ams": {"tray_now": "255"},
         }
     }
@@ -158,6 +231,8 @@ def main():
     log.info(f"broker={BROKER}:{PORT} serial={SERIAL} lan={LAN_CODE}")
     log.info(f"topic={REPORT_TOPIC}")
     log.info(f"pattern={PATTERN} step={STEP_SECONDS}s")
+    log.info(f"model={MODEL} chamber_sensor={'yes' if HAS_CHAMBER else 'no'}"
+             + (f" chamber_target={CHAMBER_TARGET}°C" if HAS_CHAMBER else ""))
 
     client = mqtt.Client(mqtt.CallbackAPIVersion.VERSION2,
                          client_id=f"fake-bambu-publisher-{os.getpid()}")
@@ -208,7 +283,12 @@ def main():
             source, tray_type = PATTERN[current_index % len(PATTERN)]
             payload = json.dumps(make_payload(source, tray_type))
             client.publish(REPORT_TOPIC, payload, qos=0, retain=True)
-            log.info(f"→ source={source:8s} tray_type={tray_type or '<empty>'}")
+            percent, minutes, layer = print_progress(source)
+            log.info(f"→ source={source:8s} tray_type={tray_type or '<empty>':7s} "
+                     f"{percent:3d}% {minutes:3d}min layer {layer}/{TOTAL_LAYERS}"
+                     + (f" chamber (device.ctc packed)" if PACKED_TEMPS else
+                        f" chamber {chamber_fields(source)['chamber_temper']}"
+                        f"/{chamber_fields(source)['chamber_target']}°C" if HAS_CHAMBER else ""))
             current_index += 1
             time.sleep(STEP_SECONDS)
     except KeyboardInterrupt:

@@ -143,23 +143,51 @@ extern "C" void heat_stop(void) { applyStop(0); }
 
 // Последний опубликованный Bambu progress — для триггера publishStatusNow
 // при значимом изменении (≥1%). 0xFF = «ещё не публиковали».
-static uint8_t s_lastPublishedBambuProgress = 0xFF;
+static uint8_t s_lastPublishedProgress = 0xFF;
 
-// Добавляет units[0].progressPercent из активной интеграции (Bambu) в status.
+// Добавляет прогресс печати активной интеграции в units[0] status'а.
 // Hook вызывается из Link::publishStatusNow перед отправкой payload.
+//
+// Нагрев по нашему собственному таймеру прогресса не имеет: там портал считает
+// его сам из target.duration и elapsedTime. Прогресс приходит только от
+// принтера, и только пока идёт нагрев ради него.
+//
+// Что даёт каждый источник:
+//   Bambu     — mc_percent (процент) и mc_remaining_time (остаток, минуты).
+//   Moonraker — display_status.progress (процент). Оставшегося времени в
+//               Klipper нет вовсе: print_stats отдаёт только прошедшее
+//               (print_duration), а ETA слайсера туда не попадает.
+//
+// remainingSeconds публикуем рядом с процентом, но полосу по нему строить
+// нельзя: начала печати мы не знаем — нагрев мог включиться на середине.
+// Портал рисует полосу по проценту, а остаток показывает текстом.
 static void enrichStatus(JsonObject root) {
   using AI = idryer::cloud::ActiveIntegration;
   auto *mgr = device().integrationsManager();
-  if (!mgr || mgr->getActive() != AI::Bambu)
+  if (!mgr)
     return;
   if (device().status.mode[0] != iDryer::UnitMode::Heating)
     return;
   JsonArray units = root["units"];
   if (units.isNull() || units.size() == 0)
     return;
-  const auto &ps = mgr->bambuPrinterStatus();
-  units[0]["progressPercent"] = ps.progressPercent;
-  s_lastPublishedBambuProgress = ps.progressPercent;
+
+  const AI active = mgr->getActive();
+  if (active == AI::Bambu) {
+    const auto &ps = mgr->bambuPrinterStatus();
+    units[0]["progressPercent"] = ps.progressPercent;
+    // 0 = принтер остатка не прислал; поле в этом случае не пишем, чтобы
+    // портал не показал «осталось 0 мин» там, где данных просто нет.
+    if (ps.remainingSeconds > 0)
+      units[0]["remainingSeconds"] = ps.remainingSeconds;
+    s_lastPublishedProgress = ps.progressPercent;
+  } else if (active == AI::Moonraker) {
+    const auto &ms = mgr->moonrakerStatus();
+    // progress приходит долей 0..1 от display_status, клиент уже перевёл в %.
+    const uint8_t pct = (uint8_t)(ms.progress + 0.5f);
+    units[0]["progressPercent"] = pct;
+    s_lastPublishedProgress = pct;
+  }
 }
 
 // Добавляет deviceType/active/outputMode/targetTempC в каждый пакет телеметрии.
@@ -303,7 +331,7 @@ void setup() {
   // 5. Добавляем deviceType/active/outputMode/targetTempC в каждый publish
   // телеметрии.
   device().onTelemetryPublish(enrichTelemetry);
-  // Аналогично — обогащаем status (units[0].progressPercent от Bambu).
+  // Аналогично — обогащаем status прогрессом печати от активной интеграции.
   device().onStatusPublish(enrichStatus);
 
   // 6. Периодические задачи через cooperative scheduler фасада.
@@ -313,18 +341,29 @@ void setup() {
     if (m == iDryer::UnitMode::Heating || m == iDryer::UnitMode::Storage)
       device().status.elapsedS[0]++;
   });
-  //    Триггер publishStatusNow при ∆Bambu progress ≥ 1% — иначе status
-  //    шлётся только при смене mode/target и прогресс «застывает». 1 Гц
-  //    совпадает с частотой push_status от Bambu, спама не будет.
+  //    Триггер publishStatusNow при ∆progress ≥ 1% — иначе status шлётся
+  //    только при смене mode/target и прогресс «застывает». 1 Гц совпадает с
+  //    частотой push_status от Bambu и notify_status_update от Moonraker,
+  //    спама не будет.
   device().every(1000, []() {
     using AI = idryer::cloud::ActiveIntegration;
     auto *mgr = device().integrationsManager();
-    if (!mgr || mgr->getActive() != AI::Bambu)
+    if (!mgr)
       return;
     if (device().status.mode[0] != iDryer::UnitMode::Heating)
       return;
-    const uint8_t cur = mgr->bambuPrinterStatus().progressPercent;
-    const uint8_t last = s_lastPublishedBambuProgress;
+
+    const AI active = mgr->getActive();
+    uint8_t cur;
+    if (active == AI::Bambu) {
+      cur = mgr->bambuPrinterStatus().progressPercent;
+    } else if (active == AI::Moonraker) {
+      cur = (uint8_t)(mgr->moonrakerStatus().progress + 0.5f);
+    } else {
+      return;  // свой таймер — прогресс портал считает сам, гнать status незачем
+    }
+
+    const uint8_t last = s_lastPublishedProgress;
     const uint8_t diff = (cur > last) ? (cur - last) : (last - cur);
     if (last == 0xFF || diff >= 1)
       device().publishStatusNow();
