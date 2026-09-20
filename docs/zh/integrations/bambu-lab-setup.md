@@ -16,6 +16,8 @@ Bambu 开始预热或打印 -> Link 检测到活跃耗材 -> 从材料表中选�
 
 当打印结束或活跃工艺不再需要加热时，Link 会关闭 iHeater。
 
+!!! info "iHeater Link 是 iHeater 控制器的通信模块。请为控制器刷写 [iheater_revX_X_pulse](https://github.com/pavluchenkor/iHeater-Standalone-Firmware/releases) 固件。"
+
 ## 1. 打开设备设置
 
 在门户网站上打开 iHeater Link 卡片，然后点击齿轮图标。

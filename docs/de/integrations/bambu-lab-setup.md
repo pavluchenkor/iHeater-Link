@@ -16,6 +16,8 @@ Bambu beginnt Druckvorbereitungen oder Drucken -> Link erkennt aktives Filament 
 
 Wenn der Druckvorgang beendet wird oder das aktive Szenario keine Erwärmung mehr erfordert, deaktiviert Link iHeater.
 
+!!! info "iHeater Link ist das Kommunikationsmodul für den iHeater-Controller. Flashen Sie den Controller mit [iheater_revX_X_pulse](https://github.com/pavluchenkor/iHeater-Standalone-Firmware/releases)."
+
 ## 1. Geräteeinstellungen öffnen
 
 Öffnen Sie im Portal die iHeater Link Gerätekarte und klicken Sie auf das Zahnradsymbol.

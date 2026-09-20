@@ -28,6 +28,8 @@ M141 S0  -> target = 0  -> iHeater Link schaltet Heizung aus
 
 Viele moderne Drucker haben bereits einen Temperatursensor in der Kammer. Falls dieser Sensor vom Hersteller vorgesehen ist und in der Klipper-Konfiguration sichtbar ist, kann er verwendet werden, um die tatsächliche Temperatur an das Portal und iHeater Link zu übermitteln. Falls kein Sensor vorhanden ist, kann iHeater Link die Heizung dennoch nach der Zieltemperatur steuern.
 
+!!! info "iHeater Link ist das Kommunikationsmodul für den iHeater-Controller. Flashen Sie den Controller mit [iheater_revX_X_pulse](https://github.com/pavluchenkor/iHeater-Standalone-Firmware/releases)."
+
 ## 1. Fügen Sie die Makro-Datei hinzu
 
 Erstellen Sie eine Datei `virtual_chamber.cfg` in der Klipper-Konfiguration und beziehen Sie sie von `printer.cfg` ein:

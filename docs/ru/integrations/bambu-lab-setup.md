@@ -16,6 +16,8 @@ Bambu начинает подготовку или печать -> Link види
 
 Когда печать заканчивается или активный сценарий больше не требует нагрева, Link выключает iHeater.
 
+!!! info "iHeater Link — модуль связи для контроллера iHeater прошейте прошивкой [iheater_revХ_Х_pulse](https://github.com/pavluchenkor/iHeater-Standalone-Firmware/releases)."
+
 ## 1. Откройте настройки устройства
 
 В портале откройте карточку iHeater Link и нажмите иконку шестерёнки.

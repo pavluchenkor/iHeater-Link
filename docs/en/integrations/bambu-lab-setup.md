@@ -16,6 +16,8 @@ Bambu starts preparation or printing -> Link sees active filament -> selects tem
 
 When the print ends or the active scenario no longer requires heating, Link turns iHeater off.
 
+!!! info "iHeater Link is the communication module for the iHeater controller. Flash the controller with [iheater_revX_X_pulse](https://github.com/pavluchenkor/iHeater-Standalone-Firmware/releases)."
+
 ## 1. Open device settings
 
 In the portal, open the iHeater Link device card and click the gear icon.

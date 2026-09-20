@@ -28,6 +28,8 @@ M141 S0  -> target = 0  -> iHeater Link がヒーティングを無効にしま�
 
 多くの最新プリンタには、すでにチャンバー内の温度センサがあります。このセンサがメーカーによって提供されており、Klipperの設定に表示されている場合、実際の温度をポータルとiHeater Linkに送信するために使用できます。センサがない場合、iHeater Linkはまだ目標温度でヒーティングを管理できます。
 
+!!! info "iHeater Link は iHeater コントローラー用の通信モジュールです。コントローラーには [iheater_revX_X_pulse](https://github.com/pavluchenkor/iHeater-Standalone-Firmware/releases) を書き込んでください。"
+
 ## 1. マクロファイルを追加する
 
 Klipperの設定に `virtual_chamber.cfg` ファイルを作成し、`printer.cfg` から取り込みます：

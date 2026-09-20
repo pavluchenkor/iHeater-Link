@@ -16,6 +16,8 @@ Bambu 開始準備或列印 -> Link 識別活躍耗材 -> 從材料表中選擇�
 
 列印結束或活躍場景不再需要加熱時，Link 會關閉 iHeater。
 
+!!! info "iHeater Link 是 iHeater 控制器的通訊模組。請為控制器燒錄 [iheater_revX_X_pulse](https://github.com/pavluchenkor/iHeater-Standalone-Firmware/releases) 韌體。"
+
 ## 1. 打開設備設定
 
 在入口網站上打開 iHeater Link 設備卡片，然後單擊齒輪圖示。

@@ -28,6 +28,8 @@ M141 S0  -> target = 0  -> iHeater Link vypne ohřev
 
 Mnoho moderních tiskáren již má teplotní senzor uvnitř komory. Pokud je takový senzor navržen výrobcem a viditelný v konfiguraci Klipperu, lze jej použít k odesílání skutečné teploty na portál a iHeater Link. Pokud senzor není k dispozici, iHeater Link stále bude moci řídit ohřev podle cílové teploty.
 
+!!! info "iHeater Link je komunikační modul pro řadič iHeater. Nahrajte do řadiče firmware [iheater_revX_X_pulse](https://github.com/pavluchenkor/iHeater-Standalone-Firmware/releases)."
+
 ## 1. Přidejte soubor maker
 
 Vytvořte soubor `virtual_chamber.cfg` v konfiguraci Klipperu a připojte jej z `printer.cfg`:

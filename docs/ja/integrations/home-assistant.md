@@ -11,6 +11,8 @@ iHeater Link は MQTT Discovery を通じて Home Assistant にデバイスを�
 2. HA に **MQTT** インテグレーションが追加され、ブローカーが設定されている。
 3. iHeater Link がポータルから `link_integration {type:"ha"}` コマンドを受け取り、同じブローカーとの接続を確立している。
 
+!!! info "iHeater Link は iHeater コントローラー用の通信モジュールです。コントローラーには [iheater_revX_X_pulse](https://github.com/pavluchenkor/iHeater-Standalone-Firmware/releases) を書き込んでください。"
+
 ## ステップ 1. 設定を開く
 
 Home Assistant のサイドバーメニューの下部にある **Settings** をクリックします。

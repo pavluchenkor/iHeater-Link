@@ -11,6 +11,8 @@ iHeater Link публикует устройство в Home Assistant чере�
 2. В HA добавлена интеграция **MQTT** с настроенным брокером.
 3. iHeater Link через портал получил команду `link_integration {type:"ha"}` и установил соединение с тем же брокером.
 
+!!! info "iHeater Link — модуль связи для контроллера iHeater прошейте прошивкой [iheater_revХ_Х_pulse](https://github.com/pavluchenkor/iHeater-Standalone-Firmware/releases)."
+
 ## Шаг 1. Открыть настройки
 
 В боковом меню Home Assistant внизу нажмите **Settings**.

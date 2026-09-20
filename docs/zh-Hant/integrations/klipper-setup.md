@@ -28,6 +28,8 @@ M141 S0  -> target = 0  -> iHeater Link 關閉加熱
 
 許多現代列印機已在室內內部有溫度感測器。如果製造商規定此類感測器並在 Klipper 組態中可見，則可用於將實際溫度傳輸到入口網站和 iHeater Link。如果沒有感測器，iHeater Link 仍可根據目標溫度管理加熱。
 
+!!! info "iHeater Link 是 iHeater 控制器的通訊模組。請為控制器燒錄 [iheater_revX_X_pulse](https://github.com/pavluchenkor/iHeater-Standalone-Firmware/releases) 韌體。"
+
 ## 1. 新增巨集檔
 
 在 Klipper 組態中建立 `virtual_chamber.cfg` 檔案，並從 `printer.cfg` 包含它：

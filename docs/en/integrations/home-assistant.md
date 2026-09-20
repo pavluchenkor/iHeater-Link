@@ -11,6 +11,8 @@ iHeater Link publishes the device to Home Assistant via MQTT Discovery: HA autom
 2. The **MQTT** integration is added in HA and configured against that broker.
 3. iHeater Link has received `link_integration {type:"ha"}` from the portal and established a connection to the same broker.
 
+!!! info "iHeater Link is the communication module for the iHeater controller. Flash the controller with [iheater_revX_X_pulse](https://github.com/pavluchenkor/iHeater-Standalone-Firmware/releases)."
+
 ## Step 1. Open settings
 
 In the Home Assistant sidebar, click **Settings** at the bottom.

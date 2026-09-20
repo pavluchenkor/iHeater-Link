@@ -11,6 +11,8 @@ iHeater Link publikuje zařízení v Home Assistant přes MQTT Discovery: HA aut
 2. V HA je přidána integrace **MQTT** s nakonfigurovaným brokerem.
 3. iHeater Link obdržel příkaz `link_integration {type:"ha"}` prostřednictvím portálu a navázal spojení se stejným brokerem.
 
+!!! info "iHeater Link je komunikační modul pro řadič iHeater. Nahrajte do řadiče firmware [iheater_revX_X_pulse](https://github.com/pavluchenkor/iHeater-Standalone-Firmware/releases)."
+
 ## Krok 1. Otevření nastavení
 
 V postranní nabídce Home Assistant klikněte dole na **Settings**.

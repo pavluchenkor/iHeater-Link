@@ -16,6 +16,8 @@ Bambuが準備または印刷を開始 -> Linkがアクティブなフィラメ�
 
 印刷が終了するか、アクティブなシーケンスが加熱を必要としなくなると、LinkはiHeaterを無効にします。
 
+!!! info "iHeater Link は iHeater コントローラー用の通信モジュールです。コントローラーには [iheater_revX_X_pulse](https://github.com/pavluchenkor/iHeater-Standalone-Firmware/releases) を書き込んでください。"
+
 ## 1. デバイス設定を開く
 
 ポータルでiHeater Linkカードを開き、ギアアイコンをクリックします。

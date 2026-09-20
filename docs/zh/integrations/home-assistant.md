@@ -11,6 +11,8 @@ iHeater Link 通过 MQTT Discovery 将设备发布到 Home Assistant：HA 自动
 2. 在 HA 中添加了配置好的代理的 **MQTT** 集成。
 3. iHeater Link 通过门户网站收到命令 `link_integration {type:"ha"}` 并与同一代理建立了连接。
 
+!!! info "iHeater Link 是 iHeater 控制器的通信模块。请为控制器刷写 [iheater_revX_X_pulse](https://github.com/pavluchenkor/iHeater-Standalone-Firmware/releases) 固件。"
+
 ## 步骤 1. 打开设置
 
 在 Home Assistant 侧边栏底部，点击 **Settings**。

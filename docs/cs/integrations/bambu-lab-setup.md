@@ -16,6 +16,8 @@ Bambu zahajuje přípravu nebo tisk -> Link vidí aktivní filament -> vybere te
 
 Když se tisk skončí nebo aktivní scénář už nevyžaduje topení, Link vypne iHeater.
 
+!!! info "iHeater Link je komunikační modul pro řadič iHeater. Nahrajte do řadiče firmware [iheater_revX_X_pulse](https://github.com/pavluchenkor/iHeater-Standalone-Firmware/releases)."
+
 ## 1. Otevřete nastavení zařízení
 
 V portálu otevřete kartu iHeater Link a klikněte na ikonu ozubeného kola.

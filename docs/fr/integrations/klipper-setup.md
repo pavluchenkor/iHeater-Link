@@ -28,6 +28,8 @@ M141 S0  -> target = 0  -> iHeater Link désactive le chauffage
 
 De nombreuses imprimantes modernes ont déjà un capteur de température à l'intérieur de la chambre. Si ce capteur est prévu par le fabricant et visible dans la configuration Klipper, il peut être utilisé pour transmettre la température réelle au portail et à iHeater Link. S'il n'y a pas de capteur, iHeater Link pourra toujours contrôler le chauffage selon la température cible.
 
+!!! info "iHeater Link est le module de communication du contrôleur iHeater. Flashez le contrôleur avec [iheater_revX_X_pulse](https://github.com/pavluchenkor/iHeater-Standalone-Firmware/releases)."
+
 ## 1. Ajoutez le fichier de macros
 
 Créez un fichier `virtual_chamber.cfg` dans la configuration Klipper et incluez-le depuis `printer.cfg` :

@@ -26,6 +26,8 @@ M141 S0  -> target = 0  -> iHeater Link turns heating off
 
 Many modern printers already have a chamber temperature sensor. If the manufacturer provides such a sensor and it is visible in the Klipper configuration, it can be used to send the actual chamber temperature to the portal and iHeater Link. If there is no sensor, iHeater Link can still control heating from the target temperature.
 
+!!! info "iHeater Link is the communication module for the iHeater controller. Flash the controller with [iheater_revX_X_pulse](https://github.com/pavluchenkor/iHeater-Standalone-Firmware/releases)."
+
 ## 1. Add the macro file
 
 Create `virtual_chamber.cfg` in the Klipper configuration and include it from `printer.cfg`:

@@ -28,6 +28,8 @@ M141 S0  -> target = 0  -> iHeater Link 停止加热
 
 许多现代打印机的腔室内已装有温度传感器。如果制造商配备了此传感器并且在 Klipper 配置中可见，可用其将实际温度传送到门户网站和 iHeater Link。如果没有传感器，iHeater Link 仍可根据目标温度进行加热控制。
 
+!!! info "iHeater Link 是 iHeater 控制器的通信模块。请为控制器刷写 [iheater_revX_X_pulse](https://github.com/pavluchenkor/iHeater-Standalone-Firmware/releases) 固件。"
+
 ## 1. 添加宏文件
 
 在 Klipper 配置中创建文件 `virtual_chamber.cfg`，并从 `printer.cfg` 中引入：

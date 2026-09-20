@@ -16,6 +16,8 @@ Bambu commence la préparation ou l'impression -> Link détecte le filament acti
 
 Lorsque l'impression se termine ou que le scénario actif ne nécessite plus de chauffage, Link désactive iHeater.
 
+!!! info "iHeater Link est le module de communication du contrôleur iHeater. Flashez le contrôleur avec [iheater_revX_X_pulse](https://github.com/pavluchenkor/iHeater-Standalone-Firmware/releases)."
+
 ## 1. Ouvrez les paramètres de l'appareil
 
 Dans le portail, ouvrez la carte iHeater Link et appuyez sur l'icône d'engrenage.

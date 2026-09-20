@@ -28,6 +28,8 @@ M141 S0  -> target = 0  -> iHeater Link desativa o aquecimento
 
 Muitas impressoras modernas já possuem um sensor de temperatura dentro da câmara. Se esse sensor é fornecido pelo fabricante e visível na configuração do Klipper, ele pode ser usado para transmitir a temperatura real para o portal e iHeater Link. Se não houver sensor, iHeater Link ainda poderá controlar o aquecimento de acordo com a temperatura alvo.
 
+!!! info "iHeater Link é o módulo de comunicação do controlador iHeater. Grave o firmware [iheater_revX_X_pulse](https://github.com/pavluchenkor/iHeater-Standalone-Firmware/releases) no controlador."
+
 ## 1. Adicione o arquivo de macros
 
 Crie o arquivo `virtual_chamber.cfg` na configuração do Klipper e inclua-o em `printer.cfg`:
