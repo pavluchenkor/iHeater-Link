@@ -22,6 +22,8 @@
 #include <menu_meta.h>     // g_menu_meta[].min_val / max_val для HA-number
 #include <menu_nvs_io.h>   // menu_nvs_begin
 #include <menu_state.h> // menu.log_portal / log_printer / log_device / log_debug
+#include <menu_cache.h>
+#include <card/card_menu_bridge.h> // пределы параметров карточки из меню
 
 // ── Конфигурация устройства ──────────────────────────────────────────────────
 // Заполняется один раз при портировании прошивки на новый продукт.
@@ -140,6 +142,18 @@ extern "C" void heat_start(void) {
 }
 
 extern "C" void heat_stop(void) { applyStop(0); }
+
+// ── Действия карточки ────────────────────────────────────────────────────────
+// Параметры приходят из карточки на один запуск и в меню не пишутся. Пределы
+// и значения по умолчанию SDK берёт из меню (card_menu_bridge.h) и уже зажал в
+// них то, что пришло. Длительность в минутах; 0 — без таймера.
+static void cardHeat(uint8_t unit, JsonObjectConst args) {
+  applyHeating(unit, args["temperature"].as<float>(),
+               (uint32_t)lroundf(args["duration"].as<float>()) * 60u,
+               iDryer::UnitMode::Heating, "card:heat");
+}
+
+static void cardStop(uint8_t unit, JsonObjectConst) { applyStop(unit); }
 
 // Последний опубликованный Bambu progress — для триггера publishStatusNow
 // при значимом изменении (≥1%). 0xFF = «ещё не публиковали».
@@ -361,6 +375,20 @@ void setup() {
     device().publishStatusNow();
     Serial.println("[CMD] drying deadline expired → Off");
   });
+
+  // 6b. Действия карточки. Меню у грелки своё и уже прочитано из NVS.
+  {
+    auto &card = device().card();
+    idryer::card_menu::attach(card);
+    // Своего датчика воздуха нет (hasAirTemp = false), но температуру камеры
+    // присылает принтер через интеграцию — в units[0].temperature (см. выше).
+    card.sensor("temp", nullptr, "°C", "units[0].temperature", "temperature");
+    card.action("heat", "HEATING", cardHeat)
+        .name("ru", "Нагрев").name("en", "Heat")
+        .param("temperature", "target_temperature", MENU_HEAT_TEMP)
+        .param("duration", "duration", MENU_HEAT_DURATION);
+    card.action("stop", "IDLE", cardStop).name("ru", "Стоп").name("en", "Stop");
+  }
 
   // 7. HA controls — продуктовые сущности в HA UI. Привязаны к menu-полям
   //    (heat_temp / heat_duration) через menu_apply_by_bind: значение
