@@ -390,31 +390,7 @@ void setup() {
     card.action("stop", "IDLE", cardStop).name("ru", "Стоп").name("en", "Stop");
   }
 
-  // 7. HA controls — продуктовые сущности в HA UI. Привязаны к menu-полям
-  //    (heat_temp / heat_duration) через menu_apply_by_bind: значение
-  //    persist'ится в NVS, синхронизируется с инспектором портала.
-  //    Диапазоны (min/max) берутся из g_menu_meta — единый источник правды
-  //    с menu.yaml, при правке YAML и регенерации HA автоматически подхватит.
-  //    Кнопка Heat start читает текущие menu.heat_temp / menu.heat_duration
-  //    (тот же путь что invoke по id из DeviceMenuPanel).
-  auto &ha = device().ha();
-  ha.number(
-      "heat_temp", "Heat temperature",
-      (int)g_menu_meta[MENU_HEAT_TEMP].min_val,
-      (int)g_menu_meta[MENU_HEAT_TEMP].max_val,
-      [](int v) { menu_apply_by_bind("heat_temp", (float)v); },
-      "°C", "mdi:thermometer");
-  ha.number(
-      "heat_duration", "Heat duration",
-      (int)g_menu_meta[MENU_HEAT_DURATION].min_val,
-      (int)g_menu_meta[MENU_HEAT_DURATION].max_val,
-      [](int v) { menu_apply_by_bind("heat_duration", (float)v); },
-      "min", "mdi:timer-outline");
-  ha.button("heat_start", "Heat start", []() { heat_start(); },
-            "mdi:play-circle");
-  ha.button("stop", "Stop", []() { applyStop(0); }, "mdi:stop-circle");
-
-  // 8. Команды портала / Local-WS — обработчики через onCommand.
+  // 7. Команды портала / Local-WS — обработчики через onCommand.
   //    iHeater Link на menu_protocol_v1: запуск/остановка нагрева — только
   //    через invoke (heat.start / heat.stop, форма B). Legacy
   //    commands/drying / commands/storage / commands/stop здесь больше не
@@ -488,7 +464,7 @@ void setup() {
     s_menuBridge->applySetCommand(doc.as<JsonObjectConst>());
   });
 
-  // 9. Шина ошибок → raiseEvent() → MQTT events topic.
+  // 8. Шина ошибок → raiseEvent() → MQTT events topic.
   //    Единый словарь severity с errbus: INFO/WARN/ERROR/CRIT.
   error_set_handler([](const ErrorEvent *ev) {
     iDryer::EventKind kind;
@@ -512,7 +488,7 @@ void setup() {
     device().raiseEvent(kind, event_key, ev->msg, ev->ctrl_id);
   });
 
-  // 10. Тестовые ошибки — закомментировано, верификация пройдена.
+  // 9. Тестовые ошибки — закомментировано, верификация пройдена.
   // device().every(20000, []() {
   //     static const ErrSeverity kSev[]  = { ERRSEV_INFO, ERRSEV_WARNING,
   //     ERRSEV_ERROR, ERRSEV_CRITICAL }; static const ErrSource   kSrc[]  = {
