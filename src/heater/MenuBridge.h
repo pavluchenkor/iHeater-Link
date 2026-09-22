@@ -76,8 +76,7 @@ public:
     /// JSON: {"id":<int>, "args"?:{...}, "timestamp"?: "..."}.
     /// Находит menu item по id, если type=action — вызывает on_invoke.
     /// args сейчас игнорируются (action функции бесаргументные); сложные
-    /// команды с args (profile/rfid_write/led_pulse) — отдельная задача
-    /// согласно ___capabilities_and_menu_as_protocol.md §6.5/§10.2.
+    /// команды с args (profile/rfid_write/led_pulse) — отдельная задача.
     /// @return true если action найден и вызван.
     bool applyInvokeCommand(JsonObjectConst data);
 
