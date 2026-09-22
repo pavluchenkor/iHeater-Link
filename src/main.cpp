@@ -50,9 +50,6 @@ static const iDryer::Config CFG = {
     .hasHeaterTemp = false,  // датчик температуры нагревателя
 
     // ── Интеграции ───────────────────────────────────────────────────────────
-    .allowHa = true,        // Home Assistant MQTT
-    .allowBambu = true,     // Bambu Lab LAN MQTT
-    .allowMoonraker = true, // Moonraker WebSocket
 
     // ── Периоды публикации ───────────────────────────────────────────────────
     // Не задаём: ядро берёт их из контракта (publish_defaults в
