@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
 # Self-signed cert для fake-Bambu MQTT broker.
-# ESP-side BambuClient делает setInsecure(), поэтому подойдёт любой self-signed.
+# ESP-side BambuClient делает setInsecure(), publisher — CERT_NONE: личность
+# сервера никто не проверяет, поэтому IP в subjectAltName ниже не имеет
+# значения и под свою сеть его подгонять не нужно.
 set -e
 cd "$(dirname "$0")"
 
