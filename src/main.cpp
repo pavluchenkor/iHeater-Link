@@ -284,39 +284,22 @@ void setup() {
   // RMT и всё остальное — после.
   s_output.begin();
 
-  // 3. MenuBridge: загружает NVS, эмитит активную интеграцию. Колбэк
+  // 3. MenuBridge: загружает NVS и меню. Колбэк
   // назначается ДО begin().
   // DevicePublisher (dual-publish MQTT+WS) — чтобы config в ответ на get_config
   // доходил и до LAN-клиента, а не только в MQTT.
   static iheaterlink::MenuBridge s_menuBridgeInst(device().devicePublisher());
   s_menuBridge = &s_menuBridgeInst;
 
-  auto *mgr = device().integrationsManager();
-  s_menuBridgeInst.setActiveConnectionCallback(
-      [mgr](iheaterlink::ActiveConnection kind) {
-        using AI = idryer::cloud::ActiveIntegration;
-        AI target = AI::None;
-        switch (kind) {
-        case iheaterlink::ActiveConnection::Bambu:
-          target = AI::Bambu;
-          break;
-        case iheaterlink::ActiveConnection::Moonraker:
-          target = AI::Moonraker;
-          break;
-        case iheaterlink::ActiveConnection::Ha:
-          target = AI::Ha;
-          break;
-        default:
-          break;
-        }
-        mgr->setActive(target);
-      });
+  // Интеграциями владеет LinkIntegrationsManager: включение и настройка идут
+  // командой link_integration из раздела интеграций портала и приложения.
+  // Пунктов меню для этого нет — иначе состояние жило бы в двух местах сразу.
 
   // Связь меню «Игнор. внеш. команды» → SDK gate. Колбэк назначается ДО begin(),
   // чтобы стартовое значение из NVS было применено сразу.
   s_menuBridgeInst.setIgnoreExternalCmdCallback(
       [](bool enabled) { device().setIgnoreExternalCmd(enabled); });
-  s_menuBridgeInst.begin(); // загружает NVS, эмитит активную интеграцию
+  s_menuBridgeInst.begin(); // загружает NVS и значения меню
   applyLogFlags(); // синхронизирует log_portal/log_printer/log_device из NVS
 
   // 4. Авто-нагрев: VirtualChamber (Moonraker) и BambuPrinterStatus → RMT.
@@ -336,6 +319,7 @@ void setup() {
       applyStop(0);
     }
   });
+  auto *mgr = device().integrationsManager();
   mgr->setVirtualChamberCallback(iheaterlink::onVirtualChamberUpdate);
   mgr->setBambuPrinterStatusCallback(iheaterlink::onBambuPrinterStatusUpdate);
 
@@ -473,31 +457,14 @@ void setup() {
     }
   });
 
-  // link_integration: либа переключает интеграцию, здесь — синхронизируем
-  // меню-тогглы.
+  // link_integration: интеграции целиком на стороне либы
+  // (LinkIntegrationsManager), здесь только лог входящей команды.
   link.onCommand("link_integration", [](JsonObjectConst data) {
-    if (s_logPortal) {
-      char buf[256];
-      serializeJson(data, buf, sizeof(buf));
-      HAL_LOG_INFO("PORTAL", "← link_integration %s", buf);
-    }
-    const char *type = data["type"] | (const char *)nullptr;
-    const bool enabled = data["enabled"] | false;
-    if (!type || !enabled || !s_menuBridge)
+    if (!s_logPortal)
       return;
-    const char *bind = nullptr;
-    if (strcmp(type, "moonraker") == 0)
-      bind = "moon_en";
-    else if (strcmp(type, "bambu") == 0)
-      bind = "bambu_en";
-    else if (strcmp(type, "ha") == 0)
-      bind = "ha_en";
-    if (!bind)
-      return;
-    StaticJsonDocument<32> doc;
-    doc["bind"] = bind;
-    doc["val"] = true;
-    s_menuBridge->applySetCommand(doc.as<JsonObjectConst>());
+    char buf[256];
+    serializeJson(data, buf, sizeof(buf));
+    HAL_LOG_INFO("PORTAL", "← link_integration %s", buf);
   });
 
   // 8. Шина ошибок → raiseEvent() → MQTT events topic.

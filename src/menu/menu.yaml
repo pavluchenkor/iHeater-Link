@@ -10,43 +10,6 @@
   type: submenu
   title: { ru: "IHEATER LINK", en: "IHEATER LINK" }
   children:
-    - id: connections
-      type: submenu
-      title: { ru: "ПОДКЛЮЧЕНИЯ", en: "CONNECTIONS" }
-      children:
-        # Только один из трёх может быть активным одновременно —
-        # эксклюзивность обеспечивает MenuBridge::applySetCommand
-        # (сбрасывает остальные _en при включении одного).
-        - id: bambu_enabled
-          type: toggle
-          title: { ru: "BAMBU", en: "BAMBU" }
-          vtype: bool
-          bind: bambu_en
-          role: iheater.bambu_enabled
-          persist: true
-          scope: global
-          default: false
-
-        - id: moon_enabled
-          type: toggle
-          title: { ru: "MOONRAKER", en: "MOONRAKER" }
-          vtype: bool
-          bind: moon_en
-          role: iheater.moonraker_enabled
-          persist: true
-          scope: global
-          default: false
-
-        - id: ha_enabled
-          type: toggle
-          title: { ru: "HOME ASSISTANT", en: "HOME ASSISTANT" }
-          vtype: bool
-          bind: ha_en
-          role: iheater.ha_enabled
-          persist: true
-          scope: global
-          default: false
-
     - id: materials
       type: submenu
       title: { ru: "МАТЕРИАЛЫ", en: "MATERIALS" }

@@ -10,9 +10,6 @@
 
 class MenuState {
 public:
-  bool bambu_en = false;
-  bool moon_en = false;
-  bool ha_en = false;
   float mat_pla = 45.0f;
   float mat_petg = 50.0f;
   float mat_abs = 60.0f;

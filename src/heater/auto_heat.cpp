@@ -47,15 +47,15 @@ void setLogDecisions(bool enabled) {
     g_logDecisions = enabled;
 }
 
-// VirtualChamber из Moonraker. Активен только при moon_en=true в меню.
-// Поведение: gate (autoHeat) → available → target>0 → ON, иначе OFF.
+// VirtualChamber из Moonraker. Колбэк приходит только от активной интеграции:
+// неактивный клиент выключен (LinkIntegrationsManager::applyIntegrations), так
+// что отдельного тумблера-гейта не нужно — источник правды один.
+// Поведение: available → target>0 → ON, иначе OFF.
 void onVirtualChamberUpdate(void* /*ctx*/, const idryer::cloud::VirtualChamberData& data) {
     if (!g_output) return;
 
-    const bool autoHeat = menu.moon_en;
-
     ControllerOutputCommand cmd{};
-    if (!autoHeat || !data.available || data.target <= 0.0f) {
+    if (!data.available || data.target <= 0.0f) {
         cmd.mode = ControllerOutputMode::Off;
         cmd.targetTempC = 0.0f;
     } else {
@@ -79,8 +79,7 @@ void onVirtualChamberUpdate(void* /*ctx*/, const idryer::cloud::VirtualChamberDa
 
     if (g_logDecisions) {
         HAL_LOG_INFO("HEATER",
-                     "VIRTUAL_CHAMBER: autoHeat=%d available=%d target=%.1f temp=%.1f hasSensor=%d → target=%.1f°C",
-                     autoHeat ? 1 : 0,
+                     "VIRTUAL_CHAMBER: available=%d target=%.1f temp=%.1f hasSensor=%d → target=%.1f°C",
                      data.available ? 1 : 0,
                      data.target,
                      data.temperature,
@@ -89,13 +88,13 @@ void onVirtualChamberUpdate(void* /*ctx*/, const idryer::cloud::VirtualChamberDa
     }
 }
 
-// Bambu Reader. Активен только при bambu_en=true в меню.
+// Bambu Reader. Колбэк приходит только от активной интеграции — см. заметку
+// у onVirtualChamberUpdate.
 // Приоритеты:
-//   1. autoHeat=false → OFF.
-//   2. gcode_state не PREPARE/RUNNING → OFF (печать не идёт).
-//   3. printer.chamberTarget > 0 → setpoint от принтера (X1C с датчиком).
-//   4. trayType из AMS → materialTempFromMenu (menu.mat_*).
-//   5. Иначе OFF.
+//   1. gcode_state не PREPARE/RUNNING → OFF (печать не идёт).
+//   2. printer.chamberTarget > 0 → setpoint от принтера (X1C с датчиком).
+//   3. trayType из AMS → materialTempFromMenu (menu.mat_*).
+//   4. Иначе OFF.
 //
 // Heat-allowed states (как присылает Bambu, заглавными):
 //   RUNNING — печать идёт.
@@ -111,18 +110,13 @@ static bool bambuShouldHeat(const char* gcodeState) {
 void onBambuPrinterStatusUpdate(void* /*ctx*/, const idryer::cloud::BambuPrinterStatus& status) {
     if (!g_output) return;
 
-    const bool autoHeat        = menu.bambu_en;
     const bool stateAllowsHeat = bambuShouldHeat(status.gcodeState);
 
     ControllerOutputCommand cmd{};
     float menuTemp = 0.0f;
     const char* source = "off";
 
-    if (!autoHeat) {
-        cmd.mode = ControllerOutputMode::Off;
-        cmd.targetTempC = 0.0f;
-        source = "autoHeat=off";
-    } else if (!stateAllowsHeat) {
+    if (!stateAllowsHeat) {
         cmd.mode = ControllerOutputMode::Off;
         cmd.targetTempC = 0.0f;
         source = "state-not-printing";
@@ -167,8 +161,7 @@ void onBambuPrinterStatusUpdate(void* /*ctx*/, const idryer::cloud::BambuPrinter
 
     if (g_logDecisions) {
         HAL_LOG_INFO("HEATER",
-                     "BAMBU status: autoHeat=%d state=%s chamberTarget=%.1f chamberTemp=%.1f tray=%s menu=%.1f → target=%.1f°C (src=%s)",
-                     autoHeat ? 1 : 0,
+                     "BAMBU status: state=%s chamberTarget=%.1f chamberTemp=%.1f tray=%s menu=%.1f → target=%.1f°C (src=%s)",
                      status.gcodeState,
                      status.chamberTarget,
                      status.chamberTemp,

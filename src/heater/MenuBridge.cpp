@@ -19,58 +19,6 @@
 
 namespace iheaterlink {
 
-namespace {
-
-/// Три toggle в меню ПОДКЛЮЧЕНИЯ, из которых одновременно может быть активен
-/// только один. Порядок важен только для лога.
-constexpr const char *kConnectionToggles[] = {"bambu_en", "moon_en", "ha_en"};
-constexpr size_t kConnectionTogglesCount =
-    sizeof(kConnectionToggles) / sizeof(kConnectionToggles[0]);
-
-/// Выключить все toggle ПОДКЛЮЧЕНИЙ кроме `keepBind`.
-/// Возвращает количество отключённых.
-/// @param outIds  куда сложить id выключенных пунктов (может быть nullptr).
-/// @param outCap   ёмкость outIds.
-int disableOtherConnections(const char *keepBind, uint16_t *outIds = nullptr,
-                            size_t outCap = 0) {
-  int off = 0;
-  for (size_t i = 0; i < kConnectionTogglesCount; i++) {
-    const char *b = kConnectionToggles[i];
-    if (keepBind && strcmp(b, keepBind) == 0)
-      continue;
-    bool cur = false;
-    if (menu_read_by_bind(b, &cur) && cur) {
-      menu_apply_by_bind(b, 0.0f);
-      const MenuBinding *mb = menu_find_bind(b);
-      if (mb && outIds && (size_t)off < outCap)
-        outIds[off] = mb->id;
-      off++;
-      HAL_LOG_INFO("MENU", "exclusivity: %s → OFF", b);
-    }
-  }
-  return off;
-}
-
-/// Если после загрузки NVS оказалось включено больше одного — оставить первый,
-/// остальные сбросить. Invariant: максимум один активный.
-void normalizeExclusivity() {
-  const char *firstOn = nullptr;
-  for (size_t i = 0; i < kConnectionTogglesCount; i++) {
-    bool cur = false;
-    if (menu_read_by_bind(kConnectionToggles[i], &cur) && cur) {
-      if (!firstOn)
-        firstOn = kConnectionToggles[i];
-      else {
-        menu_apply_by_bind(kConnectionToggles[i], 0.0f);
-        HAL_LOG_WARN("MENU", "normalize: duplicate active toggle %s → OFF",
-                     kConnectionToggles[i]);
-      }
-    }
-  }
-}
-
-} // namespace
-
 void MenuBridge::begin() {
   if (nvsReady_)
     return;
@@ -100,15 +48,12 @@ void MenuBridge::begin() {
   // 4. Подтянуть сохранённые значения (magic/version проверяются внутри).
   menu.loadFromNVS();
 
-  // 5. Нормализовать эксклюзивность ПОДКЛЮЧЕНИЙ (если в NVS два+ активных).
-  normalizeExclusivity();
-
-  // 6. Синхронизировать MenuState → g_menu_cache (для menu_buildFullJson).
+  // 5. Синхронизировать MenuState → g_menu_cache (для menu_buildFullJson).
   //    Generic функция из autogen — генератор внутри menu_apply_by_bind тоже
   //    sync'ит на каждый set, так что после bootstrap кэш всегда актуален.
   menu_sync_state_to_cache();
 
-  // 6a. Pre-allocate MenuPublisher (один malloc на heap MENU_SERIALIZED_MAX_SIZE
+  // 5a. Pre-allocate MenuPublisher (один malloc на heap MENU_SERIALIZED_MAX_SIZE
   //     + DynamicJsonDocument). Без этого publishFullConfig() сразу упадёт.
   //     Если init не удался — логируем и продолжаем; publishFullConfig вернёт
   //     false до тех пор пока memory не освободится.
@@ -120,38 +65,12 @@ void MenuBridge::begin() {
 
   nvsReady_ = true;
 
-  // 7. Сразу эмитим текущий active чтобы LinkIntegrationsManager применил
-  //    выбранный источник (важно если в NVS уже было включено, скажем,
-  //    moon_en).
-  lastActive_ = ActiveConnection::None; // заставим emit-if-changed сработать
-  emitActiveIfChanged();
-
-  // 8. Стартовый emit для ignore_external_cmd — продукт получит callback и
+  // 6. Стартовый emit для ignore_external_cmd — продукт получит callback и
   //    вызовет link.setIgnoreExternalCmd(v) с актуальным значением из NVS.
   emitIgnoreExtCmdIfChanged();
 
   HAL_LOG_INFO("MENU", "Initialized (NVS namespace=%s, %u bindings)",
                NVS_MENU_NAMESPACE, (unsigned)g_bindings_count);
-}
-
-ActiveConnection MenuBridge::currentActive() const {
-  bool en = false;
-  if (menu_read_by_bind("bambu_en", &en) && en)
-    return ActiveConnection::Bambu;
-  if (menu_read_by_bind("moon_en", &en) && en)
-    return ActiveConnection::Moonraker;
-  if (menu_read_by_bind("ha_en", &en) && en)
-    return ActiveConnection::Ha;
-  return ActiveConnection::None;
-}
-
-void MenuBridge::emitActiveIfChanged() {
-  ActiveConnection cur = currentActive();
-  if (cur == lastActive_)
-    return;
-  lastActive_ = cur;
-  if (activeCb_)
-    activeCb_(cur);
 }
 
 void MenuBridge::emitIgnoreExtCmdIfChanged() {
@@ -298,30 +217,13 @@ bool MenuBridge::applySetCommand(JsonObjectConst data) {
     return false;
   }
 
-  // Изменённые пункты для дельты: сам пункт + те, что погасила эксклюзивность.
-  uint16_t changed[1 + kConnectionTogglesCount];
+  // Изменённый пункт для дельты.
+  uint16_t changed[1];
   uint8_t changedCount = 0;
   changed[changedCount++] = b->id;
 
-  // Эксклюзивность ПОДКЛЮЧЕНИЙ: если включили bambu_en/moon_en/ha_en —
-  // остальные два выключаем.
-  if (val > 0.0f) {
-    for (size_t i = 0; i < kConnectionTogglesCount; i++) {
-      if (strcmp(b->bind, kConnectionToggles[i]) == 0) {
-        const int off = disableOtherConnections(
-            b->bind, changed + changedCount,
-            sizeof(changed) / sizeof(changed[0]) - changedCount);
-        changedCount += (uint8_t)off;
-        break;
-      }
-    }
-  }
-
   // Cache уже синхронизирован: menu_apply_by_bind() (autogen) делает sync
   // конкретного binding'а в g_menu_cache. Дополнительный sync не нужен.
-
-  // После эксклюзивности сообщаем наверх о новом активном ПОДКЛЮЧЕНИИ.
-  emitActiveIfChanged();
 
   // Если поменяли toggle игнора внешних команд — сообщаем продукту, чтобы
   // он вызвал link.setIgnoreExternalCmd(v) (SDK включит/выключит guard).

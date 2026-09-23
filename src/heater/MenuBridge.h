@@ -25,14 +25,6 @@ namespace idryer { class DevicePublisher; }
 
 namespace iheaterlink {
 
-/// Идентификатор выбранного в меню «ПОДКЛЮЧЕНИЯ» источника target температуры.
-/// Соответствует значению toggle-поля (bambu_en / moon_en / ha_en).
-enum class ActiveConnection : uint8_t { None = 0, Bambu, Moonraker, Ha };
-
-/// Колбэк на смену активного ПОДКЛЮЧЕНИЯ — вызывается из MenuBridge при
-/// изменении toggle-ов или при старте (синхронизация с сохранённым NVS).
-using ActiveConnectionCallback = std::function<void(ActiveConnection)>;
-
 /// Колбэк на изменение toggle "Игнор. внеш. команд". Вызывается из begin()
 /// со стартовым значением (из NVS) и далее при каждом applySetCommand,
 /// которое поменяло этот bind.
@@ -41,11 +33,6 @@ using IgnoreExternalCmdCallback = std::function<void(bool)>;
 class MenuBridge {
 public:
     explicit MenuBridge(idryer::DevicePublisher* pub) : pub_(pub) {}
-
-    /// Зарегистрировать колбэк на смену активного ПОДКЛЮЧЕНИЯ.
-    /// Будет вызван один раз из begin() со стартовым значением и далее
-    /// при каждом applySetCommand, которое поменяло bambu_en/moon_en/ha_en.
-    void setActiveConnectionCallback(ActiveConnectionCallback cb) { activeCb_ = std::move(cb); }
 
     /// Зарегистрировать колбэк на изменение toggle "Игнор. внеш. команд".
     /// Будет вызван один раз из begin() со стартовым значением (из NVS) и
@@ -81,20 +68,11 @@ public:
     bool applyInvokeCommand(JsonObjectConst data);
 
 private:
-    /// Прочитать текущее состояние bambu_en/moon_en/ha_en и вернуть
-    /// активное подключение (или None если все выключены).
-    ActiveConnection currentActive() const;
-
-    /// Вызвать activeCb_ если значение изменилось с прошлого вызова.
-    void emitActiveIfChanged();
-
     /// Вызвать ignoreExtCmdCb_ если значение изменилось с прошлого вызова.
     void emitIgnoreExtCmdIfChanged();
 
     idryer::DevicePublisher* pub_ = nullptr;
     bool nvsReady_ = false;
-    ActiveConnectionCallback activeCb_;
-    ActiveConnection lastActive_ = ActiveConnection::None;
     IgnoreExternalCmdCallback ignoreExtCmdCb_;
     bool lastIgnoreExtCmd_ = false;
     bool ignoreExtCmdInitialized_ = false;

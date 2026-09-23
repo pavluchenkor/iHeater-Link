@@ -37,6 +37,7 @@ Notable changes to the `iHeater-link` firmware — the link module between the i
 ### Removed
 
 - The "PORTAL" menu section with the "LINK" item. Portal binding does not involve the menu.
+- **The "CONNECTIONS" menu section with the Bambu, Moonraker and Home Assistant toggles.** A toggle could only switch an integration on and off, while the broker address, printer serial and keys are set exclusively in the integrations section of the portal and the app — there was essentially nothing for the menu to switch on. On top of that the menu and the integrations section changed the same state independently and drifted apart. There is a single path now: the integrations section.
 
 ### Fixed
 

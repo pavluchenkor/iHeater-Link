@@ -9,9 +9,6 @@
 MenuState menu;
 
 void MenuState::initDefaults(){
-  this->bambu_en = false;
-  this->moon_en = false;
-  this->ha_en = false;
   this->mat_pla = 45.0f;
   this->mat_petg = 50.0f;
   this->mat_abs = 60.0f;
@@ -61,9 +58,6 @@ void MenuState::loadFromNVS(){
   }
   char key[16];
   (void)key;
-  ee_read("bambu_en", this->bambu_en);
-  ee_read("moon_en", this->moon_en);
-  ee_read("ha_en", this->ha_en);
   ee_read("mat_pla", this->mat_pla);
   ee_read("mat_petg", this->mat_petg);
   ee_read("mat_abs", this->mat_abs);
@@ -108,9 +102,6 @@ void MenuState::saveToNVS(){
   ee_write(NVS_KEY_VERSION, (uint32_t)NVS_MENU_VERSION);
   char key[16];
   (void)key;
-  ee_store_field("bambu_en", this->bambu_en);
-  ee_store_field("moon_en", this->moon_en);
-  ee_store_field("ha_en", this->ha_en);
   ee_store_field("mat_pla", this->mat_pla);
   ee_store_field("mat_petg", this->mat_petg);
   ee_store_field("mat_abs", this->mat_abs);

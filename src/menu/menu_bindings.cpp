@@ -15,9 +15,6 @@ extern "C" {
 
 extern MenuState menu;
 const MenuBinding g_bindings[] = {
-  {MENU_BAMBU_ENABLED, "bambu_en", VT_BOOL, (void*)&menu.bambu_en, true, nullptr, false, SCOPE_GLOBAL},
-  {MENU_MOON_ENABLED, "moon_en", VT_BOOL, (void*)&menu.moon_en, true, nullptr, false, SCOPE_GLOBAL},
-  {MENU_HA_ENABLED, "ha_en", VT_BOOL, (void*)&menu.ha_en, true, nullptr, false, SCOPE_GLOBAL},
   {MENU_IHEATER_LINK_PLA_TEMP, "mat_pla", VT_F32, (void*)&menu.mat_pla, true, nullptr, false, SCOPE_GLOBAL},
   {MENU_IHEATER_LINK_PETG_TEMP, "mat_petg", VT_F32, (void*)&menu.mat_petg, true, nullptr, false, SCOPE_GLOBAL},
   {MENU_IHEATER_LINK_ABS_TEMP, "mat_abs", VT_F32, (void*)&menu.mat_abs, true, nullptr, false, SCOPE_GLOBAL},
