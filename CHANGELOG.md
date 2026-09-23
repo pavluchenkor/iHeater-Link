@@ -1,56 +1,49 @@
 # Changelog
 
-Этот файл ведётся на русском языке и фиксирует заметные изменения в прошивке `iHeater-link` — модуля связи между нагревателем iHeater и порталом.
+Notable changes to the `iHeater-link` firmware — the link module between the iHeater and the portal. Russian version: [CHANGELOG.ru.md](CHANGELOG.ru.md).
 
-## Типы изменений
+## Types of changes
 
-- **Добавлено** — для новых функций.
-- **Изменено** — для изменений в существующей функциональности.
-- **Устарело** — для функций, которые скоро будут удалены.
-- **Удалено** — для удалённых на данный момент функций.
-- **Исправлено** — для любых исправлений багов.
-- **Безопасность** — на случай уязвимостей.
+- **Added** — for new features.
+- **Changed** — for changes in existing functionality.
+- **Deprecated** — for soon-to-be removed features.
+- **Removed** — for now removed features.
+- **Fixed** — for any bug fixes.
+- **Security** — in case of vulnerabilities.
 
-## [Не выпущено]
+## [3.0.0] — 2026-09-23
 
-### Изменено
+### Added
 
-- **Изменение настройки подтверждается патчем, а не пересылкой всего меню.** Портал получает одно изменившееся значение вместо трёх с половиной килобайт, а устройство не собирает меню целиком на каждую правку.
-- **Меню целиком уходит при выходе в онлайн.** Раньше устройство отправляло его только по запросу портала, и снимок на брокере устаревал.
-- Периоды публикации телеметрии и статуса больше не заданы в прошивке — их берёт ядро из контракта. Прежние значения совпадали с контрактными, но дублировали их.
+- **Firmware updates over the air.** The link module updates itself. The heater's own firmware is not updated over the air: it is connected by a single signal wire and is flashed over USB.
+- **Portal binding without a PIN.** The device receives its key on connection and is addressed in the cloud by its own identifier.
+- **Unbinding from the portal.** A portal command wipes the key and the device returns to the pairing state.
+- **Chamber temperature from the active integration.** The target sent by the printer is visible in the portal and in the app.
+- **Bambu Lab print progress in the device status.**
+- **Flash layout without a filesystem.** Each firmware partition is 1984 KB instead of 1280 KB: the firmware does not use a filesystem.
 
-- **Прогресс печати и остаток на карточке нагрева.** Устройство отдаёт процент печати от Bambu и Moonraker, а от Bambu ещё и оставшееся время. Раньше процент уходил только от Bambu, а остаток разбирался, но никуда не публиковался.
+### Changed
 
-### Удалено
+- **The local network keeps control even when the cloud is off.** The "ignore external commands" setting now blocks the portal only. The app on the same network keeps controlling the heater.
+- The working mode is called "Heating" instead of "Drying".
+- The firmware moved to the shared `idryer-core` library: portal link, binding and protocol are the same across the ecosystem.
+- **Better link stability on ESP32-C3 Super Mini.** Wi-Fi transmit power is limited on these boards.
+- **A setting change is confirmed by a patch instead of resending the whole menu.** The portal receives the single changed value instead of three and a half kilobytes, and the device does not assemble the entire menu on every edit.
+- **The whole menu is sent when the device comes online.** Previously it was sent only on the portal's request, and the snapshot on the broker went stale.
+- Telemetry and status periods are no longer set in the firmware — the core takes them from the contract. The old values matched the contract but duplicated it.
+- **Print progress and time left on the heating card.** The device reports the print percentage from Bambu and Moonraker, and the remaining time from Bambu. Previously only Bambu's percentage was sent, and the remaining time was parsed but never published.
+- **The device declares its integrations.** All three are compiled into the heater — Home Assistant, Bambu Lab and Moonraker; the portal and the app draw the buttons from that list.
 
-- Раздел меню «ПОРТАЛ» с пунктом «СВЯЗАТЬ». Привязка к порталу идёт без участия меню.
+### Removed
 
-### Исправлено
+- The "PORTAL" menu section with the "LINK" item. Portal binding does not involve the menu.
 
-- **Устройство перезагружалось при включении интеграции** (Moonraker, Bambu Lab, Home Assistant). Настройки при этом сохранялись, но связь обрывалась и портал показывал устройство офлайн. Причина — сборка всего меню в ответ на команду; теперь уходит патч, который на порядок легче.
+### Fixed
 
-## [3.0.0]
-
-### Добавлено
-
-- **Обновление прошивки по воздуху.** Обновляется модуль связи. Прошивка самого нагревателя по воздуху не обновляется: он подключён одним сигнальным проводом и шьётся по USB.
-- **Привязка к порталу без PIN.** Устройство получает ключ при подключении и адресуется в облаке по собственному идентификатору.
-- **Отвязка из портала.** Команда с портала стирает ключ, устройство возвращается в режим ожидания привязки.
-- **Температура камеры от активной интеграции.** Уставка, которую прислал принтер, видна в портале и в приложении.
-- **Прогресс печати Bambu Lab в статусе устройства.**
-
-### Изменено
-
-- **Локальная сеть управляет, даже когда облако отключено.** Настройка «Игнор. внеш. команды» блокирует теперь только портал. Приложение в той же сети продолжает управлять нагревателем.
-- Рабочий режим называется «Нагрев» вместо «Сушка».
-- Прошивка переведена на общую библиотеку `idryer-core`: связь с порталом, привязка и протокол одинаковы для всех устройств экосистемы.
-- **Повышена стабильность связи ESP32-C3 Super Mini.** Мощность Wi-Fi ограничена на платах ESP32-C3 Super Mini.
-
-### Исправлено
-
-- **Меню и настройки нагревателя видны по локальной сети.** Раньше конфигурация уходила только в облако, и приложение в локальной сети её не получало. Правки значений по локальной сети теперь тоже отображаются.
-- Критические ошибки нагревателя доходят до портала как критические, а не как обычные события.
+- **The device rebooted when an integration was switched on** (Moonraker, Bambu Lab, Home Assistant). The settings survived, but the link dropped and the portal showed the device offline. The cause was assembling the whole menu in response to the command; a patch goes out now, which is an order of magnitude lighter.
+- **The heater's menu and settings are visible over the local network.** Previously the configuration went to the cloud only, and the app on the local network did not receive it. Values edited over the local network now show up too.
+- Critical heater errors reach the portal as critical rather than as ordinary events.
 
 ## [2.x]
 
-Серия пробных сборок. Направление завершено, наработки перенесены в 3.0.0.
+A series of trial builds. The direction was closed, the work carried over into 3.0.0.
