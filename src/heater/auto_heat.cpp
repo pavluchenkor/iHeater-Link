@@ -19,16 +19,40 @@ RmtOutputAdapter* g_output           = nullptr;
 bool              g_logDecisions     = false;
 SessionCallback   g_bambuSession     = nullptr;
 SessionCallback   g_moonrakerSession = nullptr;
-// Дедуп: вызываем session-колбэк только при смене heating/target. Иначе на
-// каждом push_status (Bambu ~1 Hz) / Klipper update триггерили бы
-// publishStatusNow и засоряли MQTT портала. initialized=true сразу — чтобы
-// первый Off на старте не дёргал лишний applyStop.
+// Прошлое решение интеграции. Используется как запасной источник сравнения,
+// пока не подключён читатель опубликованного состояния (wirePublishedState).
 struct SessionPrev {
     bool  heating = false;
     float target  = 0.0f;
 };
 SessionPrev g_bambuPrev;
 SessionPrev g_moonrakerPrev;
+PublishedStateReader g_published = nullptr;
+
+// Нужна ли синхронизация портального статуса с решением интеграции.
+//
+// Сравнение идёт с ОПУБЛИКОВАННЫМ состоянием, а не с прошлым решением самой
+// интеграции: ручная команда (меню, действие карточки) пишет в status свою
+// цель, а железу её тут же возвращает следующий push принтера. Сравнение с
+// прошлым решением интеграции такой перезаписи не видит — 55 равны 55 — и
+// статус остаётся с ручными 60, пока принтер сам не сменит цель.
+//
+// Дедуп при этом сохраняется: пока опубликованное совпадает с решением,
+// колбэк не зовётся, и push ~1 Гц от Bambu не засоряет MQTT портала.
+// @p prev — запасной источник, когда читатель не подключён.
+bool sessionNeedsSync(SessionPrev& prev, bool nowHeating, float nowTarget) {
+    float pubTarget  = prev.target;
+    bool  pubHeating = prev.heating;
+    if (g_published) g_published(pubTarget, pubHeating);
+
+    const float dT = nowTarget - pubTarget;
+    const bool  targetChanged = (dT > 0.01f) || (dT < -0.01f);
+    const bool  changed = (pubHeating != nowHeating) || (nowHeating && targetChanged);
+
+    prev.heating = nowHeating;
+    prev.target  = nowTarget;
+    return changed;
+}
 }
 
 void wireAutoHeat(RmtOutputAdapter* output) {
@@ -41,6 +65,10 @@ void wireBambuSession(SessionCallback cb) {
 
 void wireMoonrakerSession(SessionCallback cb) {
     g_moonrakerSession = cb;
+}
+
+void wirePublishedState(PublishedStateReader reader) {
+    g_published = reader;
 }
 
 void setLogDecisions(bool enabled) {
@@ -65,17 +93,10 @@ void onVirtualChamberUpdate(void* /*ctx*/, const idryer::cloud::VirtualChamberDa
     g_output->apply(cmd);
 
     // Sync portal session: см. подробный комментарий в onBambuPrinterStatusUpdate.
-    const bool  nowHeating = (cmd.mode == ControllerOutputMode::TargetTemperature);
-    const float nowTarget  = cmd.targetTempC;
-    const float dT         = nowTarget - g_moonrakerPrev.target;
-    const bool  targetChanged = (dT > 0.01f) || (dT < -0.01f);
-    const bool  changed = (g_moonrakerPrev.heating != nowHeating)
-                       || (nowHeating && targetChanged);
-    if (changed && g_moonrakerSession) {
-        g_moonrakerSession(nowTarget, nowHeating);
+    const bool nowHeating = (cmd.mode == ControllerOutputMode::TargetTemperature);
+    if (sessionNeedsSync(g_moonrakerPrev, nowHeating, cmd.targetTempC) && g_moonrakerSession) {
+        g_moonrakerSession(cmd.targetTempC, nowHeating);
     }
-    g_moonrakerPrev.heating = nowHeating;
-    g_moonrakerPrev.target  = nowTarget;
 
     if (g_logDecisions) {
         HAL_LOG_INFO("HEATER",
@@ -147,17 +168,10 @@ void onBambuPrinterStatusUpdate(void* /*ctx*/, const idryer::cloud::BambuPrinter
     // обновит device().status.mode[] (Drying/Idle), sessionNum, targetTempC и
     // позовёт publishStatusNow. Без этого нагрев от Bambu не виден на портале
     // как сессия — нет push, нет истории.
-    const bool  nowHeating = (cmd.mode == ControllerOutputMode::TargetTemperature);
-    const float nowTarget  = cmd.targetTempC;
-    const float dT         = nowTarget - g_bambuPrev.target;
-    const bool  targetChanged = (dT > 0.01f) || (dT < -0.01f);
-    const bool  changed = (g_bambuPrev.heating != nowHeating)
-                       || (nowHeating && targetChanged);
-    if (changed && g_bambuSession) {
-        g_bambuSession(nowTarget, nowHeating);
+    const bool nowHeating = (cmd.mode == ControllerOutputMode::TargetTemperature);
+    if (sessionNeedsSync(g_bambuPrev, nowHeating, cmd.targetTempC) && g_bambuSession) {
+        g_bambuSession(cmd.targetTempC, nowHeating);
     }
-    g_bambuPrev.heating = nowHeating;
-    g_bambuPrev.target  = nowTarget;
 
     if (g_logDecisions) {
         HAL_LOG_INFO("HEATER",

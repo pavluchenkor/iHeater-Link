@@ -29,6 +29,17 @@ using SessionCallback = void(*)(float targetTempC, bool heating);
 void wireBambuSession(SessionCallback cb);
 void wireMoonrakerSession(SessionCallback cb);
 
+/// Чтение опубликованного состояния нагрева (device().status): какая цель и
+/// идёт ли нагрев прямо сейчас по данным портала.
+///
+/// Сторож дедупа сравнивает решение интеграции с опубликованным состоянием, а
+/// не с прошлым решением самой интеграции. Иначе ручная команда, влезшая между
+/// двумя обновлениями принтера, оставляет свою цель в status: железо уже греет
+/// по принтеру, а карточка и Home Assistant показывают введённое человеком —
+/// и так до тех пор, пока принтер сам не сменит цель.
+using PublishedStateReader = void(*)(float& targetTempC, bool& heating);
+void wirePublishedState(PublishedStateReader reader);
+
 /// Включить/выключить логирование решений о нагреве (теги HEATER).
 void setLogDecisions(bool enabled);
 

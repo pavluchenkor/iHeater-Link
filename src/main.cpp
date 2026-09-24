@@ -305,6 +305,16 @@ void setup() {
   // 4. Авто-нагрев: VirtualChamber (Moonraker) и BambuPrinterStatus → RMT.
   //    wireAutoHeat сохраняет указатель на s_output до подписки колбэков.
   iheaterlink::wireAutoHeat(&s_output);
+
+  // Сторожу дедупа нужно знать, что реально опубликовано в status: решение
+  // интеграции сверяется с ним, а не с прошлым решением интеграции. Иначе
+  // ручная команда, влезшая между двумя обновлениями принтера, остаётся в
+  // status навсегда — железо уже греет по принтеру, а карточка показывает
+  // введённое человеком.
+  iheaterlink::wirePublishedState([](float &targetTempC, bool &heating) {
+    targetTempC = device().status.targetTempC[0];
+    heating     = (device().status.mode[0] != iDryer::UnitMode::Idle);
+  });
   iheaterlink::wireBambuSession([](float targetTempC, bool heating) {
     if (heating) {
       applyHeating(0, targetTempC, 0, iDryer::UnitMode::Heating, "Bambu");
