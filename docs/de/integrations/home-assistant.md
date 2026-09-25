@@ -4,7 +4,7 @@ iHeater Link meldet sich in Home Assistant über **MQTT Discovery** an: HA erste
 
 Nachfolgend: die Integration einschalten, prüfen und ein fertiges Karten-Layout, damit das Gerät aufgeräumt aussieht und nicht wie eine Liste von Entitäten.
 
-![Karte von iHeater Link in Home Assistant](../../img/ha-card.png)
+![Karte von iHeater Link in Home Assistant](../../img/iheater-ha-card.png)
 *Kammertemperatur, Heizleistung und Start des Heizens in einem Block.*
 
 !!! note
@@ -32,7 +32,7 @@ Nachfolgend: die Integration einschalten, prüfen und ein fertiges Karten-Layout
 
 Die Einstellungen gehen über das lokale Netzwerk direkt an das Gerät — das Portal speichert sie nicht. Home Assistant wird über einen eigenen Schalter eingeschaltet und stört die Druckerintegrationen nicht: Bambu Lab und Moonraker werden getrennt ausgewählt, und es arbeitet immer nur eine von beiden.
 
-![Das Fenster Home Assistant im Block „Integrationen“ auf dem Portal](../../img/ha-portal-integration.png)
+![Das Fenster Home Assistant im Block „Integrationen“ auf dem Portal](../../img/iheater-ha-portal-integration.png)
 *Die Adresse des Brokers, der Port und das Kennzeichen „Aktiviert“ — mehr braucht das Gerät nicht.*
 
 ## Schritt 2. Das Gerät in Home Assistant finden
@@ -141,7 +141,7 @@ views:
       icon_tap_action: *id002
 ```
 
-![Raw configuration editor mit dem eingefügten Layout](../../img/ha-raw-editor.png)
+![Raw configuration editor mit dem eingefügten Layout](../../img/iheater-ha-raw-editor.png)
 *Dasselbe Layout im Konfigurationseditor des Dashboards.*
 
 Die Reihenfolge des Starts ist dieselbe wie in der App: Zuerst werden Temperatur und Dauer festgelegt, danach wird **Heizen starten** gedrückt. Die Schaltfläche **Stopp** schaltet das Heizen aus.

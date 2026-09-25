@@ -4,7 +4,7 @@ iHeater Link se publica en Home Assistant mediante **MQTT Discovery**: HA crea l
 
 A continuación: activación de la integración, comprobación y una disposición de tarjeta lista para usar, para que el dispositivo se vea ordenado y no como una lista de entidades.
 
-![Tarjeta de iHeater Link en Home Assistant](../../img/ha-card.png)
+![Tarjeta de iHeater Link en Home Assistant](../../img/iheater-ha-card.png)
 *Temperatura de la cámara, potencia de calentamiento e inicio del calentamiento en un solo bloque.*
 
 !!! note
@@ -32,7 +32,7 @@ Abre el dispositivo en [portal.idryer.org](https://portal.idryer.org/) y busca e
 
 Los ajustes van directamente al dispositivo por la red local — el portal no los guarda. Home Assistant se activa con su propio interruptor y no estorba a las integraciones de impresora: Bambu Lab y Moonraker se eligen aparte, y a la vez funciona solo una de ellas.
 
-![Ventana de Home Assistant en el bloque «Integraciones» del portal](../../img/ha-portal-integration.png)
+![Ventana de Home Assistant en el bloque «Integraciones» del portal](../../img/iheater-ha-portal-integration.png)
 *Dirección del broker, puerto y la marca «Activado» — todo lo que el dispositivo necesita.*
 
 ## Paso 2. Encontrar el dispositivo en Home Assistant
@@ -141,7 +141,7 @@ views:
       icon_tap_action: *id002
 ```
 
-![Raw configuration editor con la disposición pegada](../../img/ha-raw-editor.png)
+![Raw configuration editor con la disposición pegada](../../img/iheater-ha-raw-editor.png)
 *La misma disposición en el editor de configuración del dashboard.*
 
 El orden de arranque es el mismo que en la aplicación: primero se fijan la temperatura y la duración, después se pulsa **Iniciar calentamiento**. El botón **Parar** apaga el calentamiento.

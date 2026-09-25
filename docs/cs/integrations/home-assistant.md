@@ -4,7 +4,7 @@ iHeater Link se do Home Assistant publikuje přes **MQTT Discovery**: HA sám vy
 
 Níže je zapnutí integrace, kontrola a hotové rozložení karty, aby zařízení vypadalo úhledně, a ne jako seznam entit.
 
-![Karta iHeater Link v Home Assistant](../../img/ha-card.png)
+![Karta iHeater Link v Home Assistant](../../img/iheater-ha-card.png)
 *Teplota komory, výkon ohřevu a spuštění ohřevu v jednom bloku.*
 
 !!! note
@@ -32,7 +32,7 @@ Otevřete zařízení na [portal.idryer.org](https://portal.idryer.org/) a najd�
 
 Nastavení jde přímo do zařízení po místní síti — portál je neukládá. Home Assistant se zapíná vlastním přepínačem a nepřekáží tiskovým integracím: Bambu Lab a Moonraker se volí zvlášť a současně funguje jedna z nich.
 
-![Okno Home Assistant v bloku „Integrace“ na portálu](../../img/ha-portal-integration.png)
+![Okno Home Assistant v bloku „Integrace“ na portálu](../../img/iheater-ha-portal-integration.png)
 *Adresa brokeru, port a příznak „Zapnuto“ — vše, co zařízení potřebuje.*
 
 ## Krok 2. Najít zařízení v Home Assistant
@@ -141,7 +141,7 @@ views:
       icon_tap_action: *id002
 ```
 
-![Raw configuration editor s vloženým rozložením](../../img/ha-raw-editor.png)
+![Raw configuration editor s vloženým rozložením](../../img/iheater-ha-raw-editor.png)
 *Totéž rozložení v editoru konfigurace dashboardu.*
 
 Pořadí spuštění je stejné jako v aplikaci: nejprve se zadá teplota a délka, pak se stiskne **Spustit ohřev**. Tlačítko **Stop** ohřev vypne.

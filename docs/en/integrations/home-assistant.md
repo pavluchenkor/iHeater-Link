@@ -4,7 +4,7 @@ iHeater Link publishes itself to Home Assistant via **MQTT Discovery**: HA creat
 
 Below: enabling the integration, verification and a ready-made card layout, so that the device looks tidy rather than a list of entities.
 
-![The iHeater Link card in Home Assistant](../../img/ha-card.png)
+![The iHeater Link card in Home Assistant](../../img/iheater-ha-card.png)
 *Chamber temperature, heating power and heating start in a single block.*
 
 !!! note
@@ -32,7 +32,7 @@ Open the device at [portal.idryer.org](https://portal.idryer.org/) and find the 
 
 The settings go straight to the device over the local network — the portal does not store them. Home Assistant is turned on by its own switch and does not interfere with the printer integrations: Bambu Lab and Moonraker are selected separately, and only one of them works at a time.
 
-![The Home Assistant window in the "Integrations" block on the portal](../../img/ha-portal-integration.png)
+![The Home Assistant window in the "Integrations" block on the portal](../../img/iheater-ha-portal-integration.png)
 *The broker address, port and the "Enabled" flag — everything the device needs.*
 
 ## Step 2. Find the device in Home Assistant
@@ -141,7 +141,7 @@ views:
       icon_tap_action: *id002
 ```
 
-![Raw configuration editor with the layout pasted in](../../img/ha-raw-editor.png)
+![Raw configuration editor with the layout pasted in](../../img/iheater-ha-raw-editor.png)
 *The same layout in the dashboard configuration editor.*
 
 The start sequence is the same as in the app: first the temperature and the duration are set, then **Start heating** is pressed. The **Stop** button turns the heating off.

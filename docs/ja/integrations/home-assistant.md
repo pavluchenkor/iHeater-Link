@@ -4,7 +4,7 @@ iHeater Link は **MQTT Discovery** によって Home Assistant に自身を公�
 
 以下では、連携の有効化、動作確認、そして本機がエンティティの羅列ではなく整った形で表示されるためのカードレイアウトを説明します。
 
-![Home Assistant の iHeater Link カード](../../img/ha-card.png)
+![Home Assistant の iHeater Link カード](../../img/iheater-ha-card.png)
 *チャンバー温度、ヒーター出力、加熱の開始を 1 つのブロックにまとめた状態。*
 
 !!! note
@@ -32,7 +32,7 @@ iHeater Link は **MQTT Discovery** によって Home Assistant に自身を公�
 
 設定はローカルネットワーク経由で本機に直接送信されます。ポータルは保存しません。Home Assistant は独立したスイッチで有効になり、プリンター連携とは干渉しません。Bambu Lab と Moonraker は別途選択し、同時に動作するのはどちらか一方です。
 
-![ポータルの「連携」ブロックにある Home Assistant のウィンドウ](../../img/ha-portal-integration.png)
+![ポータルの「連携」ブロックにある Home Assistant のウィンドウ](../../img/iheater-ha-portal-integration.png)
 *ブローカーのアドレス、ポート、「有効」のチェック — 本機に必要なのはこれだけです。*
 
 ## ステップ 2. Home Assistant でデバイスを探す
@@ -141,7 +141,7 @@ views:
       icon_tap_action: *id002
 ```
 
-![レイアウトを貼り付けた Raw configuration editor](../../img/ha-raw-editor.png)
+![レイアウトを貼り付けた Raw configuration editor](../../img/iheater-ha-raw-editor.png)
 *ダッシュボードの設定エディタに表示された同じレイアウト。*
 
 起動の手順はアプリと同じです。まず温度と時間を設定し、次に **加熱を開始** を押します。**停止** ボタンで加熱を切ります。

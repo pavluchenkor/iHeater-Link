@@ -4,7 +4,7 @@ iHeater Link 通过 **MQTT Discovery** 把自己发布到 Home Assistant：HA �
 
 下面是启用集成、检查以及现成的卡片布局，让设备显示得整齐，而不是一串实体列表。
 
-![Home Assistant 中的 iHeater Link 卡片](../../img/ha-card.png)
+![Home Assistant 中的 iHeater Link 卡片](../../img/iheater-ha-card.png)
 *腔室温度、加热功率和启动加热在同一个区块中。*
 
 !!! note
@@ -32,7 +32,7 @@ iHeater Link 通过 **MQTT Discovery** 把自己发布到 Home Assistant：HA �
 
 设置通过局域网直接发送到设备 —— 门户不保存它们。Home Assistant 用自己的开关启用，不会影响打印机集成：Bambu Lab 和 Moonraker 单独选择，同时只有其中一个工作。
 
-![门户「集成」区块中的 Home Assistant 窗口](../../img/ha-portal-integration.png)
+![门户「集成」区块中的 Home Assistant 窗口](../../img/iheater-ha-portal-integration.png)
 *代理地址、端口和「已启用」标记 —— 设备需要的全部内容。*
 
 ## 步骤 2. 在 Home Assistant 中找到设备
@@ -141,7 +141,7 @@ views:
       icon_tap_action: *id002
 ```
 
-![粘贴了布局的 Raw configuration editor](../../img/ha-raw-editor.png)
+![粘贴了布局的 Raw configuration editor](../../img/iheater-ha-raw-editor.png)
 *仪表板配置编辑器中的同一布局。*
 
 启动顺序和应用中一样：先设定温度和持续时间，然后按 **启动加热**。**停止** 按钮关闭加热。

@@ -4,7 +4,7 @@ iHeater Link 透過 **MQTT Discovery** 在 Home Assistant 中發布自己：HA �
 
 以下是啟用整合、檢查，以及現成的卡片版面配置，讓裝置看起來整齊，而不是一串實體清單。
 
-![Home Assistant 中的 iHeater Link 卡片](../../img/ha-card.png)
+![Home Assistant 中的 iHeater Link 卡片](../../img/iheater-ha-card.png)
 *腔室溫度、加熱功率與啟動加熱集中在一個區塊。*
 
 !!! note
@@ -32,7 +32,7 @@ iHeater Link 透過 **MQTT Discovery** 在 Home Assistant 中發布自己：HA �
 
 設定會透過本機網路直接送到裝置——入口不會保存這些設定。Home Assistant 由自己的開關啟用，不會干擾印表機整合：Bambu Lab 與 Moonraker 另外選擇，且同時只有其中一個運作。
 
-![入口「整合」區塊中的 Home Assistant 視窗](../../img/ha-portal-integration.png)
+![入口「整合」區塊中的 Home Assistant 視窗](../../img/iheater-ha-portal-integration.png)
 *代理伺服器位址、連接埠和「啟用」標記——這就是裝置所需的全部內容。*
 
 ## 步驟 2. 在 Home Assistant 中找到裝置
@@ -141,7 +141,7 @@ views:
       icon_tap_action: *id002
 ```
 
-![貼上版面配置後的 Raw configuration editor](../../img/ha-raw-editor.png)
+![貼上版面配置後的 Raw configuration editor](../../img/iheater-ha-raw-editor.png)
 *儀表板設定編輯器中的同一份版面配置。*
 
 啟動順序與應用程式中相同：先設定溫度與持續時間，然後按下 **啟動加熱**。**停止** 按鈕關閉加熱。
