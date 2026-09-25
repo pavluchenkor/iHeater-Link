@@ -1,80 +1,168 @@
-# iHeater Link を Home Assistant に接続する
+# Home Assistant
 
-iHeater Link は MQTT Discovery を通じて Home Assistant にデバイスを公開します。HA は自動的に実センサーと制御要素を備えたカードを作成します（目標温度、継続時間、IDLE/DRYING/STORAGE モード）。
+iHeater Link は **MQTT Discovery** によって Home Assistant に自身を公開します。HA がエンティティ（温度、ヒーター出力、加熱開始用フィールド、ボタン）を自動的に作成します。ポータルは不要で、すべては自分の MQTT ブローカーを経由します。
+
+以下では、連携の有効化、動作確認、そして本機がエンティティの羅列ではなく整った形で表示されるためのカードレイアウトを説明します。
+
+![Home Assistant の iHeater Link カード](../../img/ha-card.png)
+*チャンバー温度、ヒーター出力、加熱の開始を 1 つのブロックにまとめた状態。*
 
 !!! note
-    デバイスは `Settings → Devices & services → Discovered` に表示されません。iHeater Link は MQTT Discovery を使用しており、UPnP/zeroconf ではありません。Home Assistant には既に MQTT ブローカーを指定した **MQTT** インテグレーションが追加されていなければなりません。
+    デバイスは `Settings → Devices & services → Discovered` には**表示されません**。これは UPnP/zeroconf ではなく MQTT Discovery だからです。Home Assistant には **MQTT** 連携をあらかじめ追加しておく必要があります。
 
-## 準備が必要なもの
+## 必要なもの
 
-1. MQTT ブローカー（例：Mosquitto アドオン）が HA で実行中であるか、ネットワーク経由でアクセス可能である。
-2. HA に **MQTT** インテグレーションが追加され、ブローカーが設定されている。
-3. iHeater Link がポータルから `link_integration {type:"ha"}` コマンドを受け取り、同じブローカーとの接続を確立している。
+1. MQTT ブローカー: Home Assistant のアドオン **Mosquitto broker**、またはネットワーク内の任意のブローカー。
+2. Home Assistant に、そのブローカーを指す **MQTT** 連携が追加されていること。
+3. iHeater Link がネットワークに接続され、ポータル上で `Online` であること。
 
-!!! info "iHeater Link は iHeater コントローラー用の通信モジュールです。コントローラーには [iheater_revX_X_pulse](https://github.com/pavluchenkor/iHeater-Standalone-Firmware/releases) を書き込んでください。"
+!!! info "iHeater Link は iHeater コントローラー用の通信モジュールです。コントローラーには [iheater_revX_X_pulse](https://github.com/pavluchenkor/iHeater-Standalone-Firmware/releases) のファームウェアを書き込んでください。"
 
-## ステップ 1. 設定を開く
+## ステップ 1. 本機で連携を有効にする
 
-Home Assistant のサイドバーメニューの下部にある **Settings** をクリックします。
+[portal.idryer.org](https://portal.idryer.org/) でデバイスを開き、**連携** → **Home Assistant** のブロックを表示します。
+
+| 項目 | 入力する内容 |
+|---|---|
+| Host | ネットワーク内のブローカーのアドレス。例: `192.168.1.27` |
+| Port | ブローカーのポート。通常は `1883` |
+| Username / Password | ブローカーが要求する場合の認証情報 |
+| Discovery prefix | HA の設定で変更していなければ `homeassistant` |
+| 有効 | チェックを入れる。入れないと本機はブローカーに接続しない |
+
+設定はローカルネットワーク経由で本機に直接送信されます。ポータルは保存しません。Home Assistant は独立したスイッチで有効になり、プリンター連携とは干渉しません。Bambu Lab と Moonraker は別途選択し、同時に動作するのはどちらか一方です。
+
+![ポータルの「連携」ブロックにある Home Assistant のウィンドウ](../../img/ha-portal-integration.png)
+*ブローカーのアドレス、ポート、「有効」のチェック — 本機に必要なのはこれだけです。*
+
+## ステップ 2. Home Assistant でデバイスを探す
+
+サイドバーメニューの下部にある **Settings** をクリックします。
 
 ![サイドバーメニューの Settings](../../img/HA-integration-01.png)
 
-## ステップ 2. Devices & services に移動
-
-設定セクションのリストから **Devices & services** を選択します。
+**Devices & services** を選択します。
 
 ![Devices & services](../../img/HA-integration-02.png)
 
-## ステップ 3. MQTT インテグレーションを開く
+**MQTT** のカードを探します。名前の下に接続済みデバイスのカウンターがあります。
 
-インテグレーションのリストから **MQTT** カードを見つけます。名前の下に接続されたデバイスのカウンターがあります。
+![連携一覧の MQTT](../../img/HA-integration-03.png)
 
-![インテグレーション一覧の MQTT](../../img/HA-integration-03.png)
+**Services** セクションでブローカーのノードを展開します。iDryer の機器は `DEVICE_*` 形式のシリアル番号で表示されます。
 
-## ステップ 4. iDryer デバイスを探す
+![MQTT のデバイス](../../img/HA-integration-04.png)
 
-インテグレーションページの **Services** セクションで、ブローカーノード（`127.0.0.1` またはブローカーのアドレス）を展開します。その下に `DEVICE_*` という形式のシリアルナンバーを持つ iDryer デバイスがリストされています。
-
-![MQTT デバイス](../../img/HA-integration-04.png)
-
-必要なデバイスをクリックします。
-
-## ステップ 5. 制御と状態
-
-デバイスページには 2 つのセクションがあります：
-
-- **Controls** — 制御要素：
-  - `iDryer U1 duration` — 分単位の継続時間
-  - `iDryer U1 mode control` — モード（`IDLE` / `DRYING` / `STORAGE`）
-  - `iDryer U1 target temp` — 目標温度（スライダー）
-- **Sensors** — 実値。構成はデバイスのタイプによって異なります（`Config` は公開されるセンサーを決定します）：
-  - iHeater Link: `heater_power`, `mode`, `alerts`
-  - Storage Link: 上記に加えて `temperature`, `humidity`
+デバイスを開くと、HA にはすでに測定値と操作要素が表示されています。
 
 ![HA のデバイスページ](../../img/HA-integration-05.png)
 
-加熱を開始するには：
+## ステップ 3. カードを作成する
 
-1. スライダーで目標温度を設定します。
-2. 継続時間を設定します。
-3. セレクターで `DRYING` または `STORAGE` モードを選択します。
+HA はエンティティを自動で配置するため、長い一覧になってしまいます。用意されたレイアウトは、測定値を上部に、加熱の開始を別のブロックとして配置します。
 
-停止するには、セレクターを `IDLE` に切り替えます。
+1. `Settings` → `Dashboards` → **Add dashboard** → 空のダッシュボードを作成し、開きます。
+2. 右上隅 → 鉛筆アイコン（**Edit**）→ 「⋮」メニュー → **Raw configuration editor**。
+3. 以下の内容を貼り付けて保存します。
 
-!!! note
-    `target temp` と `duration` の値は最初にデバイスに「保留中」として保存され、実際の開始はモード選択時に行われます。これにより、パラメータを任意の順序で設定し、1 つの操作で開始できます。
+このレイアウトは `sections` タイプのダッシュボードを前提としています。
 
-## 内部の動作
+```yaml
+title: iDryer
+views:
+- title: Devices
+  path: devices
+  type: sections
+  max_columns: 4
+  sections:
+  - type: grid
+    background: true
+    cards:
+    - type: heading
+      heading: iHeater Link
+      heading_style: title
+      icon: mdi:radiator
+      badges:
+      - type: entity
+        entity: sensor.iheater_link_mode
+        show_icon: false
+        show_state: true
+        color: primary
+    - type: tile
+      entity: sensor.iheater_link_temperature
+      name: Temperature
+      visibility:
+      - condition: state
+        entity: sensor.iheater_link_temperature
+        state_not:
+        - unknown
+        - unavailable
+    - type: tile
+      entity: sensor.iheater_link_heater_power
+      name: Heater power
+    - type: heading
+      heading: Heat
+      heading_style: subtitle
+    - type: tile
+      entity: number.iheater_link_heat_temperature
+      name: Temperature
+      features:
+      - type: numeric-input
+        style: buttons
+      features_position: bottom
+    - type: tile
+      entity: number.iheater_link_heat_duration
+      name: Duration
+      features:
+      - type: numeric-input
+        style: buttons
+      features_position: bottom
+    - type: tile
+      entity: button.iheater_link_heat
+      name: Start heating
+      icon: mdi:play
+      hide_state: true
+      tap_action: &id001
+        action: perform-action
+        perform_action: button.press
+        target:
+          entity_id: button.iheater_link_heat
+      icon_tap_action: *id001
+    - type: tile
+      entity: button.iheater_link_stop
+      name: Stop
+      icon: mdi:stop
+      hide_state: true
+      tap_action: &id002
+        action: perform-action
+        perform_action: button.press
+        target:
+          entity_id: button.iheater_link_stop
+      icon_tap_action: *id002
+```
 
-- **Discovery**（HA UI に正しいアイコンで entity を作成）— HA ブローカーに接続時に自動的に公開されます。構成は `Config.hasXxx` フラグによって決定されます。存在しないセンサーはファントムとして表示されません。
-- **State**（現在の値）— 5 秒ごとにポータルへの公開と並行して HA トピックに公開されます。
-- **Commands**（`set_temp` / `set_duration` / `set_mode`）— HA → MQTT ブローカー → デバイス → `Request` に集約され、ポータルコマンドと同じパスを通ります。プロダクトコードに HA 固有の分岐はありません。
+![レイアウトを貼り付けた Raw configuration editor](../../img/ha-raw-editor.png)
+*ダッシュボードの設定エディタに表示された同じレイアウト。*
 
-## 診断
+起動の手順はアプリと同じです。まず温度と時間を設定し、次に **加熱を開始** を押します。**停止** ボタンで加熱を切ります。
 
-| 症状 | チェック項目 |
-|---------|---------------|
-| デバイスが HA に表示されない | ポータルのデバイスで `Home Assistant → Enabled: yes` を確認します。`integrations/status` の `ha.state` フィールドは `online` であるべきです。 |
-| Discovery は公開されたが、カードが空 | 最初の接続後 5～10 秒待ちます。値が表示されない場合は、MQTT ブローカーが retained メッセージを失っていないか確認してください。 |
-| 制御ボタンが応答しない | Discovery から `command_topic` を確認します。トピックは `idryer/{serial}/U1/set_mode` などと一致するはずです。 |
-| 不明な値を持つファントムセンサー | 前のファームウェアバージョンからの古い retained Discovery。アップデート後、次の Discovery 公開サイクルを待つか、retained をクリアします：`mosquitto_pub -t 'homeassistant/.../config' -n -r`。 |
+## エンティティ名が一致しない場合
+
+このレイアウトは `sensor.iheater_link_temperature` のような標準的な識別子を前提としています。カードに「Entity not found」と表示される場合は、`Settings` → `Devices & services` → **MQTT** → 対象のデバイス → エンティティ一覧で実際の名前を確認し、レイアウト内のプレフィックスを自分のものに置き換えてください。
+
+## 内部の仕組み
+
+- エンティティの構成は本機が自ら宣言します。自身のカード記述に基づく測定値、パラメータの入力欄、動作ボタンです。本機が持たない機能は Home Assistant にも現れません。
+- 値は通常のテレメトリと一緒に MQTT へ publish され、HA はそれをリアルタイムに受信します。
+- HA でボタンを押すと、ポータルやアプリからと同じ動作として本機に届きます。ファームウェアに「Home Assistant 専用」のロジックはありません。
+
+## トラブルシューティング
+
+| 症状 | 確認する内容 |
+|---|---|
+| HA にデバイスが表示されない | ポータルの Home Assistant 連携で「有効」にチェックが入っていること、ブローカーのアドレスとポートが正しいこと。本機は `Online` である必要があります。 |
+| 表示されたが値が `Unknown` | テレメトリの周期を待ってください。その後も空のままなら、ブローカーが retained メッセージを保持していないか、本機が接続できていません。 |
+| チャンバー温度が表示されない | センサーが iHeater コントローラーに接続されていません。センサーがない場合、本機はこの値を publish しません。 |
+| ボタンが反応しない | ブローカーで `idryer/#` トピックへの publish が許可されているか、本機のログに認証エラーが出ていないかを確認してください。 |
+| 値が `Unknown` のゴーストエンティティ | 以前のファームウェアの retained メッセージが残っています。次のコマンドで消去します: `mosquitto_pub -h <ブローカー> -t 'homeassistant/<...>/config' -n -r`。 |
+| Home Assistant と一緒に Bambu や Moonraker が消えた | Home Assistant は無関係です。別々に有効化されます。プリンター連携の選択を確認してください。動作するのはどちらか一方です。 |

@@ -4,7 +4,8 @@ iHeater Link публикует себя в Home Assistant через **MQTT Dis
 
 Ниже — включение интеграции, проверка и готовая раскладка карточки, чтобы прибор выглядел аккуратно, а не списком сущностей.
 
-<!-- СКРИНШОТ: итоговая карточка iHeater Link в Home Assistant -->
+![Карточка iHeater Link в Home Assistant](../../img/ha-card.png)
+*Температура камеры, мощность нагрева и запуск нагрева одним блоком.*
 
 !!! note
     Устройство **не появится** в `Settings → Devices & services → Discovered`: это MQTT Discovery, а не UPnP/zeroconf. Интеграция **MQTT** в Home Assistant должна быть добавлена заранее.
@@ -15,7 +16,7 @@ iHeater Link публикует себя в Home Assistant через **MQTT Dis
 2. В Home Assistant добавлена интеграция **MQTT**, указывающая на этот брокер.
 3. iHeater Link в сети и `Online` на портале.
 
-!!! info "iHeater Link — модуль связи для контроллера iHeater; прошейте контроллер прошивкой [iheater_revХ_Х_pulse](https://github.com/pavluchenkor/iHeater-Standalone-Firmware/releases)."
+!!! info "iHeater Link — модуль связи для контроллера iHeater; прошейте контроллер прошивкой [iheater_revX_X_pulse](https://github.com/pavluchenkor/iHeater-Standalone-Firmware/releases)."
 
 ## Шаг 1. Включить интеграцию на приборе
 
@@ -23,7 +24,7 @@ iHeater Link публикует себя в Home Assistant через **MQTT Dis
 
 | Поле | Что вписать |
 |---|---|
-| Host | адрес брокера в вашей сети, например `192.168.1.60` |
+| Host | адрес брокера в вашей сети, например `192.168.1.27` |
 | Port | порт брокера, обычно `1883` |
 | Username / Password | учётные данные брокера, если он их требует |
 | Discovery prefix | `homeassistant`, если не меняли его в настройках HA |
@@ -31,7 +32,8 @@ iHeater Link публикует себя в Home Assistant через **MQTT Dis
 
 Настройки уходят прямо на прибор по локальной сети — портал их не хранит. Home Assistant включается своим выключателем и не мешает принтерным интеграциям: Bambu Lab и Moonraker выбираются отдельно, и одновременно работает одна из них.
 
-<!-- СКРИНШОТ: блок «Интеграции» на портале и окно Home Assistant с полями -->
+![Окно Home Assistant в блоке «Интеграции» на портале](../../img/ha-portal-integration.png)
+*Адрес брокера, порт и признак «Включено» — всё, что нужно прибору.*
 
 ## Шаг 2. Найти устройство в Home Assistant
 
@@ -88,7 +90,7 @@ views:
         color: primary
     - type: tile
       entity: sensor.iheater_link_temperature
-      name: Температура
+      name: Temperature
       visibility:
       - condition: state
         entity: sensor.iheater_link_temperature
@@ -97,27 +99,27 @@ views:
         - unavailable
     - type: tile
       entity: sensor.iheater_link_heater_power
-      name: Мощность нагрева
+      name: Heater power
     - type: heading
-      heading: Нагрев
+      heading: Heat
       heading_style: subtitle
     - type: tile
       entity: number.iheater_link_heat_temperature
-      name: Температура
+      name: Temperature
       features:
       - type: numeric-input
         style: buttons
       features_position: bottom
     - type: tile
       entity: number.iheater_link_heat_duration
-      name: Длительность
+      name: Duration
       features:
       - type: numeric-input
         style: buttons
       features_position: bottom
     - type: tile
       entity: button.iheater_link_heat
-      name: Запустить нагрев
+      name: Start heating
       icon: mdi:play
       hide_state: true
       tap_action: &id001
@@ -128,7 +130,7 @@ views:
       icon_tap_action: *id001
     - type: tile
       entity: button.iheater_link_stop
-      name: Стоп
+      name: Stop
       icon: mdi:stop
       hide_state: true
       tap_action: &id002
@@ -139,7 +141,8 @@ views:
       icon_tap_action: *id002
 ```
 
-<!-- СКРИНШОТ: Raw configuration editor со вставленной раскладкой -->
+![Raw configuration editor со вставленной раскладкой](../../img/ha-raw-editor.png)
+*Та же раскладка в редакторе конфигурации дашборда.*
 
 Порядок запуска такой же, как в приложении: сначала задаются температура и длительность, затем нажимается **Запустить нагрев**. Кнопка **Стоп** выключает нагрев.
 

@@ -1,80 +1,168 @@
-# Conectando iHeater Link ao Home Assistant
+# Home Assistant
 
-iHeater Link publica o dispositivo no Home Assistant por meio de MQTT Discovery: HA cria automaticamente um cartão com sensores reais e elementos de controle (temperatura alvo, duração, modo IDLE/DRYING/STORAGE).
+O iHeater Link se publica no Home Assistant via **MQTT Discovery**: o próprio HA cria as entidades — temperatura, potência de aquecimento, campos de início e botões. O portal não é necessário para isso, tudo passa pelo seu broker MQTT.
+
+Abaixo: ativação da integração, verificação e um layout de cartão pronto, para que o aparelho fique organizado e não como uma lista de entidades.
+
+![Cartão do iHeater Link no Home Assistant](../../img/ha-card.png)
+*Temperatura da câmara, potência de aquecimento e início do aquecimento em um único bloco.*
 
 !!! note
-    O dispositivo **não aparecerá** em `Settings → Devices & services → Discovered`. iHeater Link usa MQTT Discovery, não UPnP/zeroconf. Home Assistant deve ter a integração **MQTT** **já adicionada**, apontando para seu broker.
+    O aparelho **não vai aparecer** em `Settings → Devices & services → Discovered`: isto é MQTT Discovery, não UPnP/zeroconf. A integração **MQTT** no Home Assistant deve estar adicionada com antecedência.
 
-## O que deve estar pronto
+## O que é necessário
 
-1. MQTT-broker (por exemplo, add-on Mosquitto) executando no HA ou acessível pela rede.
-2. Em HA, a integração **MQTT** foi adicionada com o broker configurado.
-3. iHeater Link recebeu o comando `link_integration {type:"ha"}` pelo portal e estabeleceu conexão com o mesmo broker.
+1. Um broker MQTT: o add-on **Mosquitto broker** no Home Assistant ou qualquer broker na sua rede.
+2. A integração **MQTT** adicionada no Home Assistant, apontando para esse broker.
+3. O iHeater Link na rede e `Online` no portal.
 
-!!! info "iHeater Link é o módulo de comunicação do controlador iHeater. Grave o firmware [iheater_revX_X_pulse](https://github.com/pavluchenkor/iHeater-Standalone-Firmware/releases) no controlador."
+!!! info "iHeater Link — o módulo de comunicação do controlador iHeater; grave no controlador o firmware [iheater_revX_X_pulse](https://github.com/pavluchenkor/iHeater-Standalone-Firmware/releases)."
 
-## Passo 1. Abrir configurações
+## Passo 1. Ativar a integração no aparelho
 
-No menu lateral do Home Assistant, na parte inferior, clique em **Settings**.
+Abra o dispositivo em [portal.idryer.org](https://portal.idryer.org/) e encontre o bloco **Integrações** → **Home Assistant**.
+
+| Campo | O que preencher |
+|---|---|
+| Host | o endereço do broker na sua rede, por exemplo `192.168.1.27` |
+| Port | a porta do broker, normalmente `1883` |
+| Username / Password | as credenciais do broker, se ele as exigir |
+| Discovery prefix | `homeassistant`, se você não o alterou nas configurações do HA |
+| Ativado | a caixa de seleção — sem ela o aparelho não se conecta ao broker |
+
+As configurações vão direto para o aparelho pela rede local — o portal não as armazena. O Home Assistant é ligado pelo seu próprio interruptor e não interfere nas integrações de impressora: Bambu Lab e Moonraker são escolhidos separadamente, e apenas uma delas funciona por vez.
+
+![A janela do Home Assistant no bloco «Integrações» do portal](../../img/ha-portal-integration.png)
+*O endereço do broker, a porta e a marca «Ativado» — tudo o que o aparelho precisa.*
+
+## Passo 2. Encontrar o dispositivo no Home Assistant
+
+No menu lateral, embaixo, clique em **Settings**.
 
 ![Settings no menu lateral](../../img/HA-integration-01.png)
 
-## Passo 2. Ir para Devices & services
-
-Na lista de seções de configurações, selecione **Devices & services**.
+Selecione **Devices & services**.
 
 ![Devices & services](../../img/HA-integration-02.png)
 
-## Passo 3. Abrir integração MQTT
-
-Na lista de integrações, encontre o cartão **MQTT**. Abaixo do nome — contador de dispositivos conectados.
+Encontre o cartão **MQTT**. Abaixo do nome há o contador de dispositivos conectados.
 
 ![MQTT na lista de integrações](../../img/HA-integration-03.png)
 
-## Passo 4. Encontrar dispositivo iDryer
-
-Na página de integração, na seção **Services**, expanda o nó do broker (`127.0.0.1` ou endereço do seu broker). Sob ele estão listados os dispositivos iDryer com seus números de série no formato `DEVICE_*`.
+Na seção **Services** expanda o nó do broker. Os aparelhos iDryer aparecem sob números de série no formato `DEVICE_*`.
 
 ![Dispositivos MQTT](../../img/HA-integration-04.png)
 
-Clique no dispositivo desejado.
-
-## Passo 5. Controle e estado
-
-Na página do dispositivo há dois blocos:
-
-- **Controls** — elementos de controle:
-  - `iDryer U1 duration` — duração em minutos
-  - `iDryer U1 mode control` — modo (`IDLE` / `DRYING` / `STORAGE`)
-  - `iDryer U1 target temp` — temperatura alvo (slider)
-- **Sensors** — valores reais. A composição depende do tipo de dispositivo (`Config` define quais sensores são publicados):
-  - iHeater Link: `heater_power`, `mode`, `alerts`
-  - Storage Link: o mesmo mais `temperature`, `humidity`
+Abra o dispositivo: o HA já mostra as leituras e os controles.
 
 ![Página do dispositivo no HA](../../img/HA-integration-05.png)
 
-Para iniciar o aquecimento:
+## Passo 3. Montar o cartão
 
-1. Defina a temperatura alvo com o slider.
-2. Defina a duração.
-3. Selecione o modo `DRYING` ou `STORAGE` no seletor.
+O HA distribui as entidades por conta própria, e o resultado é uma lista longa. O layout pronto coloca as leituras em cima e o início do aquecimento em um bloco separado.
 
-Para parar — mude o seletor para `IDLE`.
+1. `Settings` → `Dashboards` → **Add dashboard** → um painel vazio, abra-o.
+2. Canto superior direito → o lápis (**Edit**) → o menu «⋮» → **Raw configuration editor**.
+3. Cole o conteúdo abaixo e salve.
 
-!!! note
-    Os valores `target temp` e `duration` são primeiro salvos no dispositivo como "pendentes", o início real ocorre quando o modo é selecionado. Isso permite definir parâmetros em qualquer ordem e iniciar com uma única ação.
+O layout é feito para um painel do tipo `sections`.
+
+```yaml
+title: iDryer
+views:
+- title: Devices
+  path: devices
+  type: sections
+  max_columns: 4
+  sections:
+  - type: grid
+    background: true
+    cards:
+    - type: heading
+      heading: iHeater Link
+      heading_style: title
+      icon: mdi:radiator
+      badges:
+      - type: entity
+        entity: sensor.iheater_link_mode
+        show_icon: false
+        show_state: true
+        color: primary
+    - type: tile
+      entity: sensor.iheater_link_temperature
+      name: Temperature
+      visibility:
+      - condition: state
+        entity: sensor.iheater_link_temperature
+        state_not:
+        - unknown
+        - unavailable
+    - type: tile
+      entity: sensor.iheater_link_heater_power
+      name: Heater power
+    - type: heading
+      heading: Heat
+      heading_style: subtitle
+    - type: tile
+      entity: number.iheater_link_heat_temperature
+      name: Temperature
+      features:
+      - type: numeric-input
+        style: buttons
+      features_position: bottom
+    - type: tile
+      entity: number.iheater_link_heat_duration
+      name: Duration
+      features:
+      - type: numeric-input
+        style: buttons
+      features_position: bottom
+    - type: tile
+      entity: button.iheater_link_heat
+      name: Start heating
+      icon: mdi:play
+      hide_state: true
+      tap_action: &id001
+        action: perform-action
+        perform_action: button.press
+        target:
+          entity_id: button.iheater_link_heat
+      icon_tap_action: *id001
+    - type: tile
+      entity: button.iheater_link_stop
+      name: Stop
+      icon: mdi:stop
+      hide_state: true
+      tap_action: &id002
+        action: perform-action
+        perform_action: button.press
+        target:
+          entity_id: button.iheater_link_stop
+      icon_tap_action: *id002
+```
+
+![Raw configuration editor com o layout colado](../../img/ha-raw-editor.png)
+*O mesmo layout no editor de configuração do painel.*
+
+A ordem de início é a mesma do aplicativo: primeiro se define a temperatura e a duração, depois se pressiona **Iniciar aquecimento**. O botão **Parar** desliga o aquecimento.
+
+## Se os nomes das entidades não coincidirem
+
+O layout é feito para os identificadores padrão do tipo `sensor.iheater_link_temperature`. Se o cartão mostrar «Entity not found», veja os seus: `Settings` → `Devices & services` → **MQTT** → o seu dispositivo → a lista de entidades, — e substitua o prefixo no layout pelo seu.
 
 ## O que acontece nos bastidores
 
-- **Discovery** (criação de entidade na UI do HA com ícones corretos) — publicada automaticamente ao conectar ao broker do HA. A composição é determinada pelos sinalizadores `Config.hasXxx` — sensores ausentes não aparecem como fantasmas.
-- **State** (valores atuais) — publicada em tópicos do HA a cada 5 segundos em paralelo com a publicação no portal.
-- **Comandos** (`set_temp` / `set_duration` / `set_mode`) — vêm de HA → MQTT-broker → dispositivo → são montados em `Request` e passam pelo mesmo caminho que os comandos do portal. Sem branches específicas de HA no código do produto.
+- A composição das entidades é declarada pelo próprio aparelho — a partir da descrição do seu cartão: leituras, campos de parâmetros e botões de ações. O que o aparelho não tem não aparece no Home Assistant.
+- Os valores são publicados no MQTT junto com a telemetria comum; o HA os recebe em tempo real.
+- O toque em um botão no HA chega ao aparelho como a mesma ação vinda do portal ou do aplicativo — não há lógica separada «para o Home Assistant» no firmware.
 
 ## Diagnóstico
 
 | Sintoma | O que verificar |
-|---------|-----------------|
-| Dispositivo não aparece no HA | No dispositivo no portal — `Home Assistant → Habilitado: sim`. O campo `ha.state` em `integrations/status` deve ser `online`. |
-| Discovery publicado, mas cartão vazio | Aguarde 5–10 segundos após a primeira conexão. Se os valores não aparecerem — verifique se o MQTT-broker não está perdendo mensagens retained. |
-| Botões de controle não respondem | Verifique `command_topic` do Discovery — o tópico deve corresponder a `idryer/{serial}/U1/set_mode` etc. |
-| Sensores fantasmas com valor Unknown | Discovery antigo retained de versão anterior do firmware. Após atualizar, aguarde o próximo ciclo de publicação de Discovery ou limpe retained: `mosquitto_pub -t 'homeassistant/.../config' -n -r`. |
+|---|---|
+| O dispositivo não apareceu no HA | No portal, a integração Home Assistant está com a marca «Ativado», o endereço e a porta do broker estão corretos. O aparelho deve estar `Online`. |
+| Apareceu, mas os valores estão `Unknown` | Aguarde um ciclo de telemetria. Se continuar vazio — o broker não guarda mensagens retained ou o aparelho não se conectou a ele. |
+| Não há temperatura da câmara | O sensor não está conectado ao controlador iHeater: sem ele o aparelho não publica esse valor. |
+| Os botões não funcionam | Verifique se o broker permite a publicação nos tópicos `idryer/#` e se não há erros de autorização no log do aparelho. |
+| Entidades-fantasma com o valor `Unknown` | Restaram mensagens retained do firmware anterior. Limpe-as: `mosquitto_pub -h <broker> -t 'homeassistant/<...>/config' -n -r`. |
+| Junto com o Home Assistant sumiu o Bambu ou o Moonraker | O Home Assistant não tem nada a ver com isso — ele é ligado separadamente. Verifique a escolha da integração de impressora: apenas uma delas funciona por vez. |
